@@ -279,11 +279,25 @@ class MainActivity : AppCompatActivity() {
                     "com.coloros.safecenter.permission.startup.StartupAppListActivity"
                 )
             },
+            // 一加 (OnePlus) - ColorOS 融合前独立路径 + 融合后兼容 OPPO 路径
+            Intent().apply {
+                component = android.content.ComponentName(
+                    "com.oneplus.security",
+                    "com.oneplus.security.chainlaunch.view.ChainLaunchAppListActivity"
+                )
+            },
             // vivo
             Intent().apply {
                 component = android.content.ComponentName(
                     "com.iqoo.secure",
                     "com.iqoo.secure.ui.phoneoptimize.SoftwareManagerActivity"
+                )
+            },
+            // 魅族 Flyme
+            Intent().apply {
+                component = android.content.ComponentName(
+                    "com.meizu.safe",
+                    "com.meizu.safe.security.SafeCenterActivity"
                 )
             },
             // 三星
