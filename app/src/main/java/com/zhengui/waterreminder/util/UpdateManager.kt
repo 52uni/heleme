@@ -42,7 +42,7 @@ object UpdateManager {
      * 检查更新：先 Gitee 后 GitHub
      * @return 有新版本时返回 UpdateInfo，否则返回 null
      */
-    suspend fun checkForUpdate(context: Context): UpdateInfo? = withContext(Dispatchers.IO) {
+    suspend fun checkForUpdate(): UpdateInfo? = withContext(Dispatchers.IO) {
         val info = fetchFromGitee() ?: fetchFromGitHub() ?: return@withContext null
 
         if (info.versionCode > BuildConfig.VERSION_CODE) {

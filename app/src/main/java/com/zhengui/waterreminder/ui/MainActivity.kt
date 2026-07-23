@@ -388,7 +388,7 @@ class MainActivity : AppCompatActivity() {
         Toast.makeText(this, "正在检查更新...", Toast.LENGTH_SHORT).show()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val info = UpdateManager.checkForUpdate(this@MainActivity)
+                val info = UpdateManager.checkForUpdate()
                 if (info != null) {
                     withContext(Dispatchers.Main) {
                         showUpdateDialog(info)
