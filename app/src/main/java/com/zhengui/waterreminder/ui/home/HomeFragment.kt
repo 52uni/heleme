@@ -28,9 +28,14 @@ import com.zhengui.waterreminder.databinding.FragmentHomeBinding
 import com.zhengui.waterreminder.service.ReminderScheduler
 import com.zhengui.waterreminder.service.WaterReminderService
 import com.zhengui.waterreminder.ui.MainViewModel
+import com.zhengui.waterreminder.util.UpdateManager
 import com.zhengui.waterreminder.widget.WidgetUpdateHelper
 import com.zhengui.waterreminder.ui.persontype.PersonTypeAdapter
 import com.zhengui.waterreminder.ui.persontype.PersonTypeEditActivity
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class HomeFragment : Fragment() {
 
@@ -141,6 +146,8 @@ class HomeFragment : Fragment() {
                 viewModel.customDrink(amount)
                 WidgetUpdateHelper.updateAllWidgets(requireContext())
                 bottomSheet.dismiss()
+                // 打卡成功后检查更新
+                checkUpdateInBackground()
                 // 打卡成功后显示鼓励弹窗
                 showEncouragementDialog(amount)
             } else {
@@ -174,6 +181,7 @@ class HomeFragment : Fragment() {
             viewModel.customDrink(amount)
             WidgetUpdateHelper.updateAllWidgets(requireContext())
             bottomSheet.dismiss()
+            checkUpdateInBackground()
         }
 
         btnConfirm.setOnClickListener {
@@ -182,6 +190,7 @@ class HomeFragment : Fragment() {
                 viewModel.customDrink(amount)
                 WidgetUpdateHelper.updateAllWidgets(requireContext())
                 bottomSheet.dismiss()
+                checkUpdateInBackground()
             } else {
                 Toast.makeText(requireContext(), "请输入有效饮水量", Toast.LENGTH_SHORT).show()
             }
@@ -260,6 +269,35 @@ class HomeFragment : Fragment() {
         "太可爱了吧",
         "今天也在发光"
     )
+
+    private fun checkUpdateInBackground() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val info = UpdateManager.checkForUpdate()
+                if (info != null && _binding != null) {
+                    withContext(Dispatchers.Main) {
+                        showUpdateDialog(info)
+                    }
+                }
+            } catch (_: Exception) {
+                // 静默失败，不打扰用户
+            }
+        }
+    }
+
+    private fun showUpdateDialog(info: UpdateManager.UpdateInfo) {
+        val changelog = info.body.ifBlank { "无更新说明" }
+        androidx.appcompat.app.AlertDialog.Builder(requireContext())
+            .setTitle("发现新版本 v${info.versionName}")
+            .setMessage(changelog.take(500))
+            .setPositiveButton("立即更新") { _, _ ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    UpdateManager.downloadAndInstall(requireContext(), info)
+                }
+            }
+            .setNegativeButton("稍后", null)
+            .show()
+    }
 
     private fun showEncouragementDialog(@Suppress("UNUSED_PARAMETER") amount: Int) {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_encouragement, null)
