@@ -24,7 +24,7 @@ import com.zhengui.waterreminder.databinding.ActivityMainBinding
 import com.zhengui.waterreminder.notification.NotificationHelper
 
 import com.zhengui.waterreminder.service.ReminderScheduler
-import com.zhengui.waterreminder.service.WaterReminderService
+import com.zhengui.waterreminder.util.PreferenceManager
 import com.zhengui.waterreminder.ui.home.HomeFragment
 import com.zhengui.waterreminder.ui.persontype.PersonTypeListFragment
 import com.zhengui.waterreminder.ui.record.RecordListFragment
@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
         val reminderMenuItem = binding.navigationView.menu.findItem(R.id.nav_reminder_switch)
         val reminderActionView = reminderMenuItem.actionView
         val reminderSwitch = reminderActionView?.findViewById<SwitchMaterial>(R.id.navItemSwitch)
-        reminderSwitch?.isChecked = WaterReminderService.isReminderEnabled(this)
+        reminderSwitch?.isChecked = PreferenceManager.isReminderEnabled(this)
         reminderSwitch?.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 checkNotificationPermissionAndStart()
@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity() {
             if (isChecked) {
                 requestAutoStartPermissions(autoStartSwitch)
             } else {
-                WaterReminderService.setAutoStartEnabled(this, false)
+                PreferenceManager.setAutoStartEnabled(this, false)
                 Toast.makeText(this, "已关闭自动启动", Toast.LENGTH_SHORT).show()
             }
         }
@@ -139,7 +139,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startReminder() {
-        WaterReminderService.setReminderEnabled(this, true)
+        PreferenceManager.setReminderEnabled(this, true)
         // 先取消所有残留闹钟，防止重复或冲突
         ReminderScheduler.cancelReminder(this)
         ReminderScheduler.cancelSmallCycle(this)
@@ -151,7 +151,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun stopReminder() {
-        WaterReminderService.setReminderEnabled(this, false)
+        PreferenceManager.setReminderEnabled(this, false)
         ReminderScheduler.cancelReminder(this)
         ReminderScheduler.cancelSmallCycle(this)
         ReminderScheduler.cancelAllReminders(this)
@@ -204,7 +204,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun enableAutoStart(autoStartSwitch: SwitchMaterial) {
         // 先保存设置
-        WaterReminderService.setAutoStartEnabled(this, true)
+        PreferenceManager.setAutoStartEnabled(this, true)
 
         // 尝试引导用户开启系统自启动权限（各厂商设置页）
         if (!hasAutoStartPermission()) {

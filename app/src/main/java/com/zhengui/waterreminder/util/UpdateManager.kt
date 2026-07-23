@@ -45,13 +45,29 @@ object UpdateManager {
     suspend fun checkForUpdate(): UpdateInfo? = withContext(Dispatchers.IO) {
         val info = fetchFromGitee() ?: fetchFromGitHub() ?: return@withContext null
 
-        if (info.versionCode > BuildConfig.VERSION_CODE) {
-            Log.d(TAG, "发现新版本: ${info.versionName} (code=${info.versionCode}), 当前: ${BuildConfig.VERSION_CODE}")
+        if (isNewerVersion(info.tagName, BuildConfig.VERSION_NAME)) {
+            Log.d(TAG, "发现新版本: ${info.tagName}, 当前: ${BuildConfig.VERSION_NAME}")
             info
         } else {
-            Log.d(TAG, "已是最新版本: ${BuildConfig.VERSION_CODE}")
+            Log.d(TAG, "已是最新版本: ${BuildConfig.VERSION_NAME}")
             null
         }
+    }
+
+    /**
+     * 语义化版本比较：a > b 返回 true
+     * "1.2.1" > "1.2" → true, "1.2" > "1.2" → false
+     */
+    private fun isNewerVersion(remoteTag: String, localVersion: String): Boolean {
+        val remote = remoteTag.split(".").map { it.toIntOrNull() ?: 0 }
+        val local = localVersion.split(".").map { it.toIntOrNull() ?: 0 }
+        for (i in 0 until maxOf(remote.size, local.size)) {
+            val r = remote.getOrElse(i) { 0 }
+            val l = local.getOrElse(i) { 0 }
+            if (r > l) return true
+            if (r < l) return false
+        }
+        return false
     }
 
     private suspend fun fetchFromGitee(): UpdateInfo? = withContext(Dispatchers.IO) {

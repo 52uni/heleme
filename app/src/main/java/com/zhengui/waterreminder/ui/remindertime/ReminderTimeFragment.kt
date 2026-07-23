@@ -14,7 +14,7 @@ import com.zhengui.waterreminder.data.entity.ReminderTimeEntity
 import com.zhengui.waterreminder.databinding.DialogAddReminderBinding
 import com.zhengui.waterreminder.databinding.FragmentReminderTimeBinding
 import com.zhengui.waterreminder.service.ReminderScheduler
-import com.zhengui.waterreminder.service.WaterReminderService
+import com.zhengui.waterreminder.util.PreferenceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -196,7 +196,7 @@ class ReminderTimeFragment : Fragment() {
     }
 
     private fun rescheduleIfNeeded(context: android.content.Context) {
-        if (WaterReminderService.isReminderEnabled(context)) {
+        if (PreferenceManager.isReminderEnabled(context)) {
             ReminderScheduler.scheduleAllReminders(context)
         }
     }

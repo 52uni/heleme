@@ -8,7 +8,7 @@ import com.zhengui.waterreminder.App
 import com.zhengui.waterreminder.notification.FullscreenReminderActivity
 import com.zhengui.waterreminder.notification.NotificationHelper
 import com.zhengui.waterreminder.service.ReminderScheduler
-import com.zhengui.waterreminder.service.WaterReminderService
+import com.zhengui.waterreminder.util.PreferenceManager
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +35,7 @@ class ReminderReceiver : BroadcastReceiver() {
         val now = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.getDefault()).format(Date())
         Log.d(TAG, "========== onReceive 触发 at $now ==========")
         Log.d(TAG, "Intent extras: suggested_amount=${intent.getIntExtra("suggested_amount", -1)}, is_interval=${intent.getBooleanExtra("is_interval_reminder", false)}, is_small_cycle=${intent.getBooleanExtra("is_small_cycle_reminder", false)}, reminder_time_id=${intent.getLongExtra("reminder_time_id", -1)}, hour=${intent.getIntExtra("reminder_hour", -1)}, minute=${intent.getIntExtra("reminder_minute", -1)}")
-        Log.d(TAG, "提醒总开关: ${WaterReminderService.isReminderEnabled(context)}")
+        Log.d(TAG, "提醒总开关: ${PreferenceManager.isReminderEnabled(context)}")
 
         val pendingResult = goAsync()
 
@@ -64,7 +64,7 @@ class ReminderReceiver : BroadcastReceiver() {
             pendingResult.finish()
         } else {
             // 用户还没喝水，先检查时段再决定是否弹通知
-            if (WaterReminderService.isReminderEnabled(context)) {
+            if (PreferenceManager.isReminderEnabled(context)) {
                 scope.launch {
                     try {
                         val inPeriod = isInNotificationPeriod(context)
@@ -115,7 +115,7 @@ class ReminderReceiver : BroadcastReceiver() {
                     Log.d(TAG, "间隔提醒: 已弹通知")
                 }
 
-                if (WaterReminderService.isReminderEnabled(context)) {
+                if (PreferenceManager.isReminderEnabled(context)) {
                     // 不修改 lastDrinkTime，保持用户真实的喝水记录
                     // scheduleNextReminder 内部会根据 lastDrinkTime 或当前时间自动计算
                     ReminderScheduler.scheduleNextReminder(context)
@@ -150,7 +150,7 @@ class ReminderReceiver : BroadcastReceiver() {
             launchFullScreenReminder(context, suggestedAmount, FullscreenReminderActivity.TYPE_FIXED)
             Log.d(TAG, "固定时间提醒: 已弹通知 (label=$label)")
 
-            if (reminderTimeId > 0 && hour >= 0 && minute >= 0 && WaterReminderService.isReminderEnabled(context)) {
+            if (reminderTimeId > 0 && hour >= 0 && minute >= 0 && PreferenceManager.isReminderEnabled(context)) {
                 try {
                     ReminderScheduler.scheduleFixedReminderToTomorrow(context, reminderTimeId, hour, minute)
                     Log.d(TAG, "固定时间提醒: 已调度到明天 $hour:$minute")
@@ -159,7 +159,7 @@ class ReminderReceiver : BroadcastReceiver() {
                     ReminderScheduler.scheduleAllReminders(context)
                 }
             } else {
-                Log.d(TAG, "固定时间提醒: 跳过重新调度 (reminderTimeId=$reminderTimeId, hour=$hour, minute=$minute, enabled=${WaterReminderService.isReminderEnabled(context)})")
+                Log.d(TAG, "固定时间提醒: 跳过重新调度 (reminderTimeId=$reminderTimeId, hour=$hour, minute=$minute, enabled=${PreferenceManager.isReminderEnabled(context)})")
             }
         } finally {
             pendingResult.finish()
@@ -171,7 +171,7 @@ class ReminderReceiver : BroadcastReceiver() {
      */
     private suspend fun isInNotificationPeriod(context: Context): Boolean {
         val db = (context.applicationContext as App).database
-        val typeId = WaterReminderService.getCurrentTypeId(context)
+        val typeId = PreferenceManager.getCurrentTypeId(context)
         val type = db.personTypeDao().getById(typeId)
 
         val startHour = type?.notificationStartHour ?: 8

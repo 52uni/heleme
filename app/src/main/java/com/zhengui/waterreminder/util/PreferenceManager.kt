@@ -1,8 +1,8 @@
-package com.zhengui.waterreminder.service
+package com.zhengui.waterreminder.util
 
 import android.content.Context
 
-object WaterReminderService {
+object PreferenceManager {
 
     const val PREFS_NAME = "water_reminder_prefs"
     private const val KEY_REMINDER_ENABLED = "reminder_enabled"

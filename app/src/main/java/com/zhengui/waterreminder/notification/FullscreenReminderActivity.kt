@@ -11,7 +11,7 @@ import com.bumptech.glide.Glide
 import com.zhengui.waterreminder.R
 import com.zhengui.waterreminder.databinding.ActivityFullscreenReminderBinding
 import com.zhengui.waterreminder.service.ReminderScheduler
-import com.zhengui.waterreminder.service.WaterReminderService
+import com.zhengui.waterreminder.util.PreferenceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -88,7 +88,7 @@ class FullscreenReminderActivity : AppCompatActivity() {
 
         binding.btnDrinkNow.setOnClickListener {
             CoroutineScope(Dispatchers.IO).launch {
-                val typeId = WaterReminderService.getCurrentTypeId(this@FullscreenReminderActivity)
+                val typeId = PreferenceManager.getCurrentTypeId(this@FullscreenReminderActivity)
                 val db = (application as com.zhengui.waterreminder.App).database
                 val type = db.personTypeDao().getById(typeId)
                 val drinkAmount = type?.defaultAmountMl ?: amount
@@ -110,7 +110,7 @@ class FullscreenReminderActivity : AppCompatActivity() {
                     if (didReachGoal) {
                         showGoalCelebration()
                     } else {
-                        if (WaterReminderService.isReminderEnabled(this@FullscreenReminderActivity)) {
+                        if (PreferenceManager.isReminderEnabled(this@FullscreenReminderActivity)) {
                             CoroutineScope(Dispatchers.IO).launch {
                                 ReminderScheduler.scheduleAfterDrink(this@FullscreenReminderActivity)
                             }
@@ -119,9 +119,6 @@ class FullscreenReminderActivity : AppCompatActivity() {
                     }
                 }
 
-                if (!didReachGoal && WaterReminderService.isReminderEnabled(this@FullscreenReminderActivity)) {
-                    ReminderScheduler.scheduleAfterDrink(this@FullscreenReminderActivity)
-                }
             }
         }
 

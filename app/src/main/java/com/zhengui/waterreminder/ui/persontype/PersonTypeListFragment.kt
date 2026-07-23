@@ -6,7 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.zhengui.waterreminder.databinding.FragmentPersonTypeListBinding
-import com.zhengui.waterreminder.service.WaterReminderService
+import com.zhengui.waterreminder.util.PreferenceManager
 
 class PersonTypeListFragment : Fragment() {
 
@@ -24,12 +24,12 @@ class PersonTypeListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         viewModel = ViewModelProvider(this)[PersonTypeViewModel::class.java]
 
-        val currentTypeId = WaterReminderService.getCurrentTypeId(requireContext())
+        val currentTypeId = PreferenceManager.getCurrentTypeId(requireContext())
 
         adapter = PersonTypeAdapter(
             currentTypeId = currentTypeId,
             onSelect = { type ->
-                WaterReminderService.setCurrentTypeId(requireContext(), type.id)
+                PreferenceManager.setCurrentTypeId(requireContext(), type.id)
                 refreshAdapter()
             },
             onEdit = { type ->
@@ -57,11 +57,11 @@ class PersonTypeListFragment : Fragment() {
     }
 
     private fun refreshAdapter() {
-        val newCurrentTypeId = WaterReminderService.getCurrentTypeId(requireContext())
+        val newCurrentTypeId = PreferenceManager.getCurrentTypeId(requireContext())
         adapter = PersonTypeAdapter(
             currentTypeId = newCurrentTypeId,
             onSelect = { type ->
-                WaterReminderService.setCurrentTypeId(requireContext(), type.id)
+                PreferenceManager.setCurrentTypeId(requireContext(), type.id)
                 refreshAdapter()
             },
             onEdit = { type ->

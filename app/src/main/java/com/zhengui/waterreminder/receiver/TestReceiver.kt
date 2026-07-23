@@ -6,7 +6,7 @@ import android.content.Intent
 import android.util.Log
 import com.zhengui.waterreminder.App
 import com.zhengui.waterreminder.service.ReminderScheduler
-import com.zhengui.waterreminder.service.WaterReminderService
+import com.zhengui.waterreminder.util.PreferenceManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -64,7 +64,7 @@ class TestReceiver : BroadcastReceiver() {
 
     private suspend fun handleIntervalNow(context: Context) {
         val db = (context.applicationContext as App).database
-        val typeId = WaterReminderService.getCurrentTypeId(context)
+        val typeId = PreferenceManager.getCurrentTypeId(context)
         val type = db.personTypeDao().getById(typeId)
         val intervalMin = type?.reminderIntervalMin ?: 90
 

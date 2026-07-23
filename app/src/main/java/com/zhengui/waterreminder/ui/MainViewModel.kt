@@ -11,7 +11,7 @@ import com.zhengui.waterreminder.data.entity.PersonType
 import com.zhengui.waterreminder.data.entity.WaterRecord
 import com.zhengui.waterreminder.data.repository.PersonTypeRepository
 import com.zhengui.waterreminder.data.repository.WaterRecordRepository
-import com.zhengui.waterreminder.service.WaterReminderService
+import com.zhengui.waterreminder.util.PreferenceManager
 import com.zhengui.waterreminder.service.ReminderScheduler
 import com.zhengui.waterreminder.widget.WidgetUpdateHelper
 import kotlinx.coroutines.launch
@@ -32,7 +32,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _currentType = MutableLiveData<PersonType?>()
     val currentType: LiveData<PersonType?> = _currentType
 
-    val isReminderEnabled = MutableLiveData(WaterReminderService.isReminderEnabled(application))
+    val isReminderEnabled = MutableLiveData(PreferenceManager.isReminderEnabled(application))
 
     private val _streakDays = MutableLiveData(0)
     val streakDays: LiveData<Int> = _streakDays
@@ -63,7 +63,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val records = waterRecordRepo.getByDate(dayStart, dayEnd)
             _dailyRecords.value = records
 
-            val typeId = WaterReminderService.getCurrentTypeId(getApplication())
+            val typeId = PreferenceManager.getCurrentTypeId(getApplication())
             val type = personTypeRepo.getById(typeId)
             _currentType.value = type
             _dailyGoal.value = type?.dailyGoalMl ?: 2500
@@ -89,7 +89,7 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
                 }
             }
             _streakDays.value = streak
-            isReminderEnabled.value = WaterReminderService.isReminderEnabled(getApplication())
+            isReminderEnabled.value = PreferenceManager.isReminderEnabled(getApplication())
 
             // 数据刷新后同步小组件
             WidgetUpdateHelper.updateAllWidgets(getApplication())
@@ -98,10 +98,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun quickDrink() {
         viewModelScope.launch {
-            val typeId = WaterReminderService.getCurrentTypeId(getApplication())
+            val typeId = PreferenceManager.getCurrentTypeId(getApplication())
             val type = personTypeRepo.getById(typeId)
             waterRecordRepo.insert(type?.defaultAmountMl ?: 200, typeId)
-            if (WaterReminderService.isReminderEnabled(getApplication())) {
+            if (PreferenceManager.isReminderEnabled(getApplication())) {
                 ReminderScheduler.scheduleAfterDrink(getApplication())
             }
             refreshData()
@@ -110,9 +110,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun customDrink(amountMl: Int) {
         viewModelScope.launch {
-            val typeId = WaterReminderService.getCurrentTypeId(getApplication())
+            val typeId = PreferenceManager.getCurrentTypeId(getApplication())
             waterRecordRepo.insert(amountMl, typeId)
-            if (WaterReminderService.isReminderEnabled(getApplication())) {
+            if (PreferenceManager.isReminderEnabled(getApplication())) {
                 ReminderScheduler.scheduleAfterDrink(getApplication())
             }
             refreshData()

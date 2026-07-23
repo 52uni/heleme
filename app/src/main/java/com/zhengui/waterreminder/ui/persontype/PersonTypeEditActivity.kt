@@ -12,7 +12,7 @@ import com.zhengui.waterreminder.R
 import com.zhengui.waterreminder.data.entity.PersonType
 import com.zhengui.waterreminder.databinding.ActivityPersonTypeEditBinding
 import com.zhengui.waterreminder.service.ReminderScheduler
-import com.zhengui.waterreminder.service.WaterReminderService
+import com.zhengui.waterreminder.util.PreferenceManager
 import kotlinx.coroutines.launch
 
 class PersonTypeEditActivity : AppCompatActivity() {
@@ -112,9 +112,9 @@ class PersonTypeEditActivity : AppCompatActivity() {
      * 如果编辑的是当前激活类型且提醒已开启，清除上次喝水时间并从现在起按新间隔调度
      */
     private fun rescheduleIfActive(typeId: Long) {
-        val activeId = WaterReminderService.getCurrentTypeId(this)
+        val activeId = PreferenceManager.getCurrentTypeId(this)
         if (typeId != activeId) return
-        if (!WaterReminderService.isReminderEnabled(this)) return
+        if (!PreferenceManager.isReminderEnabled(this)) return
 
         // 清除上次喝水时间，让 scheduleNextReminder 从当前时间 + 新间隔计算
         ReminderScheduler.setLastDrinkTime(this, 0L)

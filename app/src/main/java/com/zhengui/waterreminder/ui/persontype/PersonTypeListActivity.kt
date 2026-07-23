@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.zhengui.waterreminder.databinding.ActivityPersonTypeListBinding
-import com.zhengui.waterreminder.service.WaterReminderService
+import com.zhengui.waterreminder.util.PreferenceManager
 
 class PersonTypeListActivity : AppCompatActivity() {
 
@@ -24,12 +24,12 @@ class PersonTypeListActivity : AppCompatActivity() {
 
         binding.toolbar.setNavigationOnClickListener { finish() }
 
-        val currentTypeId = WaterReminderService.getCurrentTypeId(this)
+        val currentTypeId = PreferenceManager.getCurrentTypeId(this)
 
         adapter = PersonTypeAdapter(
             currentTypeId = currentTypeId,
             onSelect = { type ->
-                WaterReminderService.setCurrentTypeId(this, type.id)
+                PreferenceManager.setCurrentTypeId(this, type.id)
                 setResult(Activity.RESULT_OK)
                 refreshAdapter()
             },
@@ -58,11 +58,11 @@ class PersonTypeListActivity : AppCompatActivity() {
     }
 
     private fun refreshAdapter() {
-        val newCurrentTypeId = WaterReminderService.getCurrentTypeId(this)
+        val newCurrentTypeId = PreferenceManager.getCurrentTypeId(this)
         adapter = PersonTypeAdapter(
             currentTypeId = newCurrentTypeId,
             onSelect = { type ->
-                WaterReminderService.setCurrentTypeId(this, type.id)
+                PreferenceManager.setCurrentTypeId(this, type.id)
                 setResult(Activity.RESULT_OK)
                 refreshAdapter()
             },

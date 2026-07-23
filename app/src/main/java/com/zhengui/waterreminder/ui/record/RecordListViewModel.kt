@@ -10,7 +10,7 @@ import com.zhengui.waterreminder.data.dao.WaterRecordDao
 import com.zhengui.waterreminder.data.entity.WaterRecord
 import com.zhengui.waterreminder.data.repository.PersonTypeRepository
 import com.zhengui.waterreminder.data.repository.WaterRecordRepository
-import com.zhengui.waterreminder.service.WaterReminderService
+import com.zhengui.waterreminder.util.PreferenceManager
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -96,7 +96,7 @@ class RecordListViewModel(application: Application) : AndroidViewModel(applicati
             _records.value = waterRecordRepo.getByDate(dayStart, dayEnd)
             _dailyTotal.value = waterRecordRepo.getDailyTotal(dayStart, dayEnd)
 
-            val typeId = WaterReminderService.getCurrentTypeId(getApplication())
+            val typeId = PreferenceManager.getCurrentTypeId(getApplication())
             val type = personTypeRepo.getById(typeId)
             _dailyGoal.value = type?.dailyGoalMl ?: 2500
             loadTypeNames()
@@ -113,7 +113,7 @@ class RecordListViewModel(application: Application) : AndroidViewModel(applicati
             _monthlySummaries.value = waterRecordRepo.getMonthlySummary(monthStart, monthEnd)
             _dailyTotal.value = waterRecordRepo.getDailyTotal(monthStart, monthEnd) ?: 0
 
-            val typeId = WaterReminderService.getCurrentTypeId(getApplication())
+            val typeId = PreferenceManager.getCurrentTypeId(getApplication())
             val type = personTypeRepo.getById(typeId)
             _dailyGoal.value = type?.dailyGoalMl ?: 2500
             _isLoading.value = false

@@ -15,8 +15,10 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -26,9 +28,10 @@ import com.zhengui.waterreminder.R
 import com.zhengui.waterreminder.data.entity.WaterRecord
 import com.zhengui.waterreminder.databinding.FragmentHomeBinding
 import com.zhengui.waterreminder.service.ReminderScheduler
-import com.zhengui.waterreminder.service.WaterReminderService
+import com.zhengui.waterreminder.util.PreferenceManager
 import com.zhengui.waterreminder.ui.MainViewModel
 import com.zhengui.waterreminder.util.UpdateManager
+import com.zhengui.waterreminder.util.dpToPx
 import com.zhengui.waterreminder.widget.WidgetUpdateHelper
 import com.zhengui.waterreminder.ui.persontype.PersonTypeAdapter
 import com.zhengui.waterreminder.ui.persontype.PersonTypeEditActivity
@@ -113,6 +116,14 @@ class HomeFragment : Fragment() {
     }
 
     private fun showCheckInDialog() {
+        showDrinkBottomSheet(isQuickMode = false)
+    }
+
+    private fun showCustomDrinkDialog() {
+        showDrinkBottomSheet(isQuickMode = true)
+    }
+
+    private fun showDrinkBottomSheet(isQuickMode: Boolean) {
         val bottomSheetView = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_custom_drink, null)
         val bottomSheet = BottomSheetDialog(requireContext())
         bottomSheet.setContentView(bottomSheetView)
@@ -121,7 +132,6 @@ class HomeFragment : Fragment() {
         val etCustomAmount = bottomSheetView.findViewById<TextInputEditText>(R.id.etCustomAmount)
         val btnConfirm = bottomSheetView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmDrink)
 
-        // 设置默认喝水量
         val defaultAmount = viewModel.currentType.value?.defaultAmountMl ?: 200
         etCustomAmount.setText(defaultAmount.toString())
 
@@ -132,11 +142,17 @@ class HomeFragment : Fragment() {
             R.id.chip500 to 500
         )
 
-        // 点击快捷选择时更新输入框
         chipGroup.setOnCheckedChangeListener { _, checkedId ->
             val amount = chipAmounts[checkedId]
             if (amount != null) {
-                etCustomAmount.setText(amount.toString())
+                if (isQuickMode) {
+                    viewModel.customDrink(amount)
+                    WidgetUpdateHelper.updateAllWidgets(requireContext())
+                    bottomSheet.dismiss()
+                    checkUpdateInBackground()
+                } else {
+                    etCustomAmount.setText(amount.toString())
+                }
             }
         }
 
@@ -146,51 +162,13 @@ class HomeFragment : Fragment() {
                 viewModel.customDrink(amount)
                 WidgetUpdateHelper.updateAllWidgets(requireContext())
                 bottomSheet.dismiss()
-                // 打卡成功后检查更新
-                checkUpdateInBackground()
-                // 打卡成功后显示鼓励弹窗
-                showEncouragementDialog(amount)
-            } else {
-                Toast.makeText(requireContext(), "请输入有效饮水量", Toast.LENGTH_SHORT).show()
-            }
-        }
-
-        bottomSheet.show()
-    }
-
-    private fun showCustomDrinkDialog() {
-        val bottomSheetView = LayoutInflater.from(requireContext()).inflate(R.layout.bottom_sheet_custom_drink, null)
-        val bottomSheet = BottomSheetDialog(requireContext())
-        bottomSheet.setContentView(bottomSheetView)
-
-        val chipGroup = bottomSheetView.findViewById<ChipGroup>(R.id.chipGroupAmounts)
-        val etCustomAmount = bottomSheetView.findViewById<TextInputEditText>(R.id.etCustomAmount)
-        val btnConfirm = bottomSheetView.findViewById<com.google.android.material.button.MaterialButton>(R.id.btnConfirmDrink)
-
-        etCustomAmount.setText(viewModel.currentType.value?.defaultAmountMl?.toString() ?: "200")
-
-        val chipAmounts = mapOf(
-            R.id.chip150 to 150,
-            R.id.chip200 to 200,
-            R.id.chip250 to 250,
-            R.id.chip500 to 500
-        )
-
-        chipGroup.setOnCheckedChangeListener { _, checkedId ->
-            val amount = chipAmounts[checkedId] ?: 200
-            viewModel.customDrink(amount)
-            WidgetUpdateHelper.updateAllWidgets(requireContext())
-            bottomSheet.dismiss()
-            checkUpdateInBackground()
-        }
-
-        btnConfirm.setOnClickListener {
-            val amount = etCustomAmount.text.toString().toIntOrNull()
-            if (amount != null && amount > 0) {
-                viewModel.customDrink(amount)
-                WidgetUpdateHelper.updateAllWidgets(requireContext())
-                bottomSheet.dismiss()
-                checkUpdateInBackground()
+                // 记录页打卡成功后也检查更新
+                if (!isQuickMode) {
+                    checkUpdateInBackground()
+                    showEncouragementDialog(amount)
+                } else {
+                    checkUpdateInBackground()
+                }
             } else {
                 Toast.makeText(requireContext(), "请输入有效饮水量", Toast.LENGTH_SHORT).show()
             }
@@ -208,13 +186,13 @@ class HomeFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
 
         val adapter = PersonTypeAdapter(
-            currentTypeId = WaterReminderService.getCurrentTypeId(requireContext()),
+            currentTypeId = PreferenceManager.getCurrentTypeId(requireContext()),
             onSelect = { type ->
-                val oldTypeId = WaterReminderService.getCurrentTypeId(requireContext())
-                WaterReminderService.setCurrentTypeId(requireContext(), type.id)
+                val oldTypeId = PreferenceManager.getCurrentTypeId(requireContext())
+                PreferenceManager.setCurrentTypeId(requireContext(), type.id)
                 viewModel.refreshData()
                 // 切换不同类型时，清除上次喝水时间并从现在按新间隔调度
-                if (oldTypeId != type.id && WaterReminderService.isReminderEnabled(requireContext())) {
+                if (oldTypeId != type.id && PreferenceManager.isReminderEnabled(requireContext())) {
                     ReminderScheduler.setLastDrinkTime(requireContext(), 0L)
                     ReminderScheduler.cancelReminder(requireContext())
                     ReminderScheduler.cancelSmallCycle(requireContext())
@@ -237,7 +215,7 @@ class HomeFragment : Fragment() {
 
         viewModel.allPersonTypes.observe(viewLifecycleOwner) { types ->
             adapter.submitList(types)
-            adapter.updateCurrentTypeId(WaterReminderService.getCurrentTypeId(requireContext()))
+            adapter.updateCurrentTypeId(PreferenceManager.getCurrentTypeId(requireContext()))
         }
 
         bottomSheet.show()
@@ -341,8 +319,6 @@ class HomeFragment : Fragment() {
         }, 2000)
     }
 
-    private fun Int.dpToPx(): Int = (this * resources.displayMetrics.density).toInt()
-
     private fun animateNumberChange(from: Int, to: Int) {
         numberAnimator?.cancel()
         numberAnimator = ValueAnimator.ofInt(from, to).apply {
@@ -360,7 +336,7 @@ class HomeFragment : Fragment() {
         super.onResume()
         viewModel.refreshData()
         // 补调度：App 被杀后重新打开时，如果提醒已开启则重新调度闹钟
-        if (WaterReminderService.isReminderEnabled(requireContext())) {
+        if (PreferenceManager.isReminderEnabled(requireContext())) {
             ReminderScheduler.scheduleNextReminder(requireContext())
             ReminderScheduler.scheduleAllReminders(requireContext())
         }
@@ -375,14 +351,7 @@ class HomeFragment : Fragment() {
     // --- 今日饮水记录小块适配器 ---
 
     inner class RecordChipAdapter :
-        RecyclerView.Adapter<RecordChipAdapter.VH>() {
-
-        private var items: List<WaterRecord> = emptyList()
-
-        fun submitList(list: List<WaterRecord>) {
-            items = list
-            notifyDataSetChanged()
-        }
+        ListAdapter<WaterRecord, RecordChipAdapter.VH>(WaterRecordDiff) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
             val view = LayoutInflater.from(parent.context)
@@ -391,7 +360,7 @@ class HomeFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: VH, position: Int) {
-            val record = items[position]
+            val record = getItem(position)
             val cal = java.util.Calendar.getInstance().apply { timeInMillis = record.drinkTime }
             val time = String.format("%02d:%02d", cal.get(java.util.Calendar.HOUR_OF_DAY), cal.get(java.util.Calendar.MINUTE))
             holder.tv.text = "$time\n${record.amountMl}ml"
@@ -409,10 +378,18 @@ class HomeFragment : Fragment() {
             }
         }
 
-        override fun getItemCount(): Int = items.size
-
         inner class VH(itemView: View) : RecyclerView.ViewHolder(itemView) {
             val tv: TextView = itemView.findViewById(R.id.tvRecordChip)
+        }
+    }
+
+    companion object {
+        private val WaterRecordDiff = object : DiffUtil.ItemCallback<WaterRecord>() {
+            override fun areItemsTheSame(oldItem: WaterRecord, newItem: WaterRecord): Boolean =
+                oldItem.id == newItem.id
+
+            override fun areContentsTheSame(oldItem: WaterRecord, newItem: WaterRecord): Boolean =
+                oldItem == newItem
         }
     }
 }

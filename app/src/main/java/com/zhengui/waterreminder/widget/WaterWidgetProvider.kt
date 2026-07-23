@@ -19,8 +19,10 @@ class WaterWidgetProvider : AppWidgetProvider() {
     }
 
     companion object {
+        private val widgetScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
         fun updateWidgets(context: Context, manager: AppWidgetManager, ids: IntArray) {
-            CoroutineScope(Dispatchers.IO).launch {
+            widgetScope.launch {
                 try {
                     val db = (context.applicationContext as App).database
                     val prefs = context.getSharedPreferences("water_reminder_prefs", Context.MODE_PRIVATE)

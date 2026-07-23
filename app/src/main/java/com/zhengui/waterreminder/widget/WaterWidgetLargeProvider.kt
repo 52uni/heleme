@@ -12,13 +12,14 @@ import com.zhengui.waterreminder.ui.MainActivity
 import kotlinx.coroutines.*
 
 class WaterWidgetLargeProvider : AppWidgetProvider() {
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     override fun onUpdate(context: Context, manager: AppWidgetManager, ids: IntArray) {
         updateWidgets(context, manager, ids)
     }
 
     companion object {
+        private val widgetScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
         private fun getDrinkPendingIntent(context: Context, widgetId: Int, amount: Int): PendingIntent {
             val intent = Intent(context, WidgetDrinkReceiver::class.java).apply {
                 putExtra("drink_amount", amount)
@@ -27,7 +28,7 @@ class WaterWidgetLargeProvider : AppWidgetProvider() {
         }
 
         fun updateWidgets(context: Context, manager: AppWidgetManager, ids: IntArray) {
-            CoroutineScope(Dispatchers.IO).launch {
+            widgetScope.launch {
                 try {
                     val db = (context.applicationContext as App).database
                     val prefs = context.getSharedPreferences("water_reminder_prefs", Context.MODE_PRIVATE)
@@ -56,12 +57,10 @@ class WaterWidgetLargeProvider : AppWidgetProvider() {
                         views.setInt(R.id.progressBar, "setProgress", percent)
                         views.setInt(R.id.progressBar, "setMax", 100)
 
-                        // Drink buttons
                         views.setOnClickPendingIntent(R.id.btnDrink150, getDrinkPendingIntent(context, id, 150))
                         views.setOnClickPendingIntent(R.id.btnDrink200, getDrinkPendingIntent(context, id, 200))
                         views.setOnClickPendingIntent(R.id.btnDrink250, getDrinkPendingIntent(context, id, 250))
 
-                        // Click on progress area opens app
                         val openIntent = Intent(context, MainActivity::class.java)
                         val pi = PendingIntent.getActivity(context, id.toInt(), openIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
                         views.setOnClickPendingIntent(R.id.widgetRoot, pi)

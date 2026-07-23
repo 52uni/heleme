@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.zhengui.waterreminder.service.ReminderScheduler
-import com.zhengui.waterreminder.service.WaterReminderService
+import com.zhengui.waterreminder.util.PreferenceManager
 
 class BootReceiver : BroadcastReceiver() {
 
@@ -12,7 +12,7 @@ class BootReceiver : BroadcastReceiver() {
         when (intent.action) {
             Intent.ACTION_BOOT_COMPLETED,
             Intent.ACTION_MY_PACKAGE_REPLACED -> {
-                if (WaterReminderService.isReminderEnabled(context)) {
+                if (PreferenceManager.isReminderEnabled(context)) {
                     ReminderScheduler.scheduleNextReminder(context)
                     ReminderScheduler.scheduleAllReminders(context)
                 }

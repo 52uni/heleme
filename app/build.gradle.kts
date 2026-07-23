@@ -12,8 +12,8 @@ android {
         applicationId = "com.zhengui.waterreminder"
         minSdk = 24
         targetSdk = 34
-        versionCode = 103
-        versionName = "1.2.1"
+        versionCode = 122
+        versionName = "1.2.2"
     }
 
     buildTypes {
@@ -76,4 +76,11 @@ dependencies {
 
     // FlexboxLayout (流式布局)
     implementation("com.google.android.flexbox:flexbox:3.0.0")
+
+    // Testing
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("androidx.test:core-ktx:1.5.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
+    testImplementation("org.robolectric:robolectric:4.10.3")
 }

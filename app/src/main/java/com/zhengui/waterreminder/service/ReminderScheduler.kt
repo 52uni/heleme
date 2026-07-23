@@ -9,6 +9,7 @@ import android.util.Log
 import com.zhengui.waterreminder.App
 import com.zhengui.waterreminder.receiver.ReminderReceiver
 import com.zhengui.waterreminder.ui.MainActivity
+import com.zhengui.waterreminder.util.PreferenceManager
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -46,7 +47,7 @@ object ReminderScheduler {
         scope.launch {
             try {
                 val db = (context.applicationContext as App).database
-                val typeId = WaterReminderService.getCurrentTypeId(context)
+                val typeId = PreferenceManager.getCurrentTypeId(context)
                 val type = db.personTypeDao().getById(typeId)
                 val intervalMin = type?.reminderIntervalMin ?: 120
                 val defaultAmount = type?.defaultAmountMl ?: 200
@@ -126,7 +127,7 @@ object ReminderScheduler {
                     scheduleAlarm(context, effectiveTriggerTime, defaultAmount)
                 }
 
-                WaterReminderService.setReminderEnabled(context, true)
+                PreferenceManager.setReminderEnabled(context, true)
             } catch (e: Exception) {
                 Log.e(TAG, "调度间隔提醒失败", e)
             }
@@ -310,7 +311,7 @@ object ReminderScheduler {
                 val db = (context.applicationContext as App).database
                 val enabledTimes = db.reminderTimeDao().getEnabled()
 
-                val typeId = WaterReminderService.getCurrentTypeId(context)
+                val typeId = PreferenceManager.getCurrentTypeId(context)
                 val type = db.personTypeDao().getById(typeId)
                 val defaultAmount = type?.defaultAmountMl ?: 200
 
@@ -350,7 +351,7 @@ object ReminderScheduler {
                     scheduleExactAlarm(alarmManager, triggerTime, pendingIntent, context)
                 }
 
-                WaterReminderService.setReminderEnabled(context, true)
+                PreferenceManager.setReminderEnabled(context, true)
             } catch (e: Exception) {
                 Log.e(TAG, "调度固定时间提醒失败", e)
             }
@@ -366,7 +367,7 @@ object ReminderScheduler {
                 val db = (context.applicationContext as App).database
                 val reminderTime = db.reminderTimeDao().getById(reminderTimeId)
                 val defaultAmount = reminderTime?.amountMl?.takeIf { it > 0 } ?: run {
-                    val typeId = WaterReminderService.getCurrentTypeId(context)
+                    val typeId = PreferenceManager.getCurrentTypeId(context)
                     val type = db.personTypeDao().getById(typeId)
                     type?.defaultAmountMl ?: 200
                 }
