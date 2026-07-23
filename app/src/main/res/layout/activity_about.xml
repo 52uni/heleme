@@ -85,7 +85,7 @@
                     android:id="@+id/tvUpdateHint"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/blue_primary"
+                    android:textColor="#111111"
                     android:textSize="14sp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@id/ivUpdateArrow"

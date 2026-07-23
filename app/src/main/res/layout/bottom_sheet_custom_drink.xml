@@ -32,28 +32,28 @@
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip150"
-            style="@style/Widget.Material3.Chip.Suggestion"
+            style="@style/BlackWhiteChip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="150ml" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip200"
-            style="@style/Widget.Material3.Chip.Suggestion"
+            style="@style/BlackWhiteChip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="200ml" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip250"
-            style="@style/Widget.Material3.Chip.Suggestion"
+            style="@style/BlackWhiteChip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="250ml" />
 
         <com.google.android.material.chip.Chip
             android:id="@+id/chip500"
-            style="@style/Widget.Material3.Chip.Suggestion"
+            style="@style/BlackWhiteChip"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="500ml" />
@@ -88,7 +88,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_marginTop="@dimen/spacing_md"
-        android:backgroundTint="@color/blue_primary"
+        android:backgroundTint="#111111"
         android:text="确认记录"
         app:cornerRadius="16dp" />
 
