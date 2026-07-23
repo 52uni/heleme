@@ -113,7 +113,7 @@ object UpdateManager {
             versionCode = versionCode,
             versionName = tagName,
             downloadUrl = downloadUrl,
-            body = body
+            body = stripMarkdown(body)
         )
     }
 
@@ -134,8 +134,21 @@ object UpdateManager {
             versionCode = versionCode,
             versionName = tagName,
             downloadUrl = downloadUrl,
-            body = body
+            body = stripMarkdown(body)
         )
+    }
+
+    /**
+     * 移除 Markdown 格式符号，用于纯文本弹窗显示
+     */
+    private fun stripMarkdown(text: String): String {
+        return text
+            .replace(Regex("""[*#]{1,3}\s?"""), "")
+            .replace(Regex("""^-\s""", RegexOption.MULTILINE), "")
+            .replace("\\n", "\n")
+            .replace(Regex("""[`>]"""), "")
+            .replace(Regex("""\n{3,}"""), "\n\n")
+            .trim()
     }
 
     /**
