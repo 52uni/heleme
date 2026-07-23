@@ -30,7 +30,7 @@
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_water_cup"
-                    android:tint="#60A5FA"
+                    android:tint="#111111"
                     android:importantForAccessibility="no" />
 
                 <TextView
@@ -39,7 +39,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="6dp"
                     android:text="今日喝水"
-                    android:textColor="#E2E8F0"
+                    android:textColor="#111111"
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text="0%"
-                android:textColor="#FFFFFF"
+                android:textColor="#111111"
                 android:textSize="32sp"
                 android:textStyle="bold" />
 
@@ -70,7 +70,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
                 android:text="0ml / 2000ml"
-                android:textColor="#CBD5E1"
+                android:textColor="#333333"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -80,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="今日已喝 0 次"
-                android:textColor="#718096"
+                android:textColor="#666666"
                 android:textSize="12sp" />
 
         </LinearLayout>
