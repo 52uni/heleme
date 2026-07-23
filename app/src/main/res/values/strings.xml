@@ -70,4 +70,11 @@
     <string name="update_later">稍后再说</string>
     <string name="update_check_failed">检查更新失败</string>
     <string name="check_update">检查更新</string>
+
+    <!-- 关于页面 -->
+    <string name="about_title">关于</string>
+    <string name="about_features">- 定时喝水提醒，养成健康饮水习惯\n- 多种人群类型，灵活设置每日目标\n- 自定义固定时间提醒，适配个人作息\n- 通知栏快捷打卡，无需解锁手机\n- 间隔循环提醒，持续关怀不遗漏\n- 喝水记录与统计洞察，追踪饮水数据\n- 桌面小组件，随时查看今日进度\n- 数据导出 CSV，方便个人分析\n- 免打扰时段设置，会议期间不打扰</string>
+    <string name="about_version_history">v1.2.2 (2026-07-23)\n代码优化与重构：重命名服务类、数据库迁移策略、合并重复代码\n\nv1.2.1 (2026-07-23)\n新增通知栏快捷打卡、数据导出 CSV 功能\n\nv1.2.0 (2026-07)\n新增统计洞察、Widget 桌面小组件、应用更新检测\n\nv1.1.0\n通知声音修复、移除前台服务常驻通知、Android 12+ 精确闹钟适配\n\nv1.0.0\n首次发布：喝水提醒、人群管理、记录查看</string>
+    <string name="update_available_hint">有新版本 %s 可用，点击查看详情</string>
+    <string name="update_not_available">已是最新版本</string>
 </resources>

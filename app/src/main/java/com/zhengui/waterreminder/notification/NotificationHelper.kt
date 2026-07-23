@@ -104,6 +104,24 @@ class NotificationHelper(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // 快捷打卡 Action - 200ml
+        val drinkAction200 = Intent(context, com.zhengui.waterreminder.receiver.NotificationActionReceiver::class.java).apply {
+            putExtra("drink_amount", 200)
+        }
+        val drinkPending200 = PendingIntent.getBroadcast(
+            context, 200, drinkAction200,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // 快捷打卡 Action - 300ml
+        val drinkAction300 = Intent(context, com.zhengui.waterreminder.receiver.NotificationActionReceiver::class.java).apply {
+            putExtra("drink_amount", 300)
+        }
+        val drinkPending300 = PendingIntent.getBroadcast(
+            context, 300, drinkAction300,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
@@ -114,6 +132,8 @@ class NotificationHelper(private val context: Context) {
             .setContentIntent(contentPendingIntent)
             .setFullScreenIntent(fullScreenPendingIntent, true)
             .setCategory(android.app.Notification.CATEGORY_ALARM)
+            .addAction(R.drawable.ic_water_cup, "喝了200ml", drinkPending200)
+            .addAction(R.drawable.ic_water_cup, "喝了300ml", drinkPending300)
             .build()
     }
 

@@ -46,6 +46,9 @@ class RecordListViewModel(application: Application) : AndroidViewModel(applicati
     private val _chartData = MutableLiveData<List<WaterRecordDao.DailySummary>>(emptyList())
     val chartData: LiveData<List<WaterRecordDao.DailySummary>> = _chartData
 
+    private val _statistics = MutableLiveData<StatisticsResult?>()
+    val statistics: LiveData<StatisticsResult?> = _statistics
+
     fun switchToDayView() {
         _isDayView.value = true
         loadDayData()
@@ -176,4 +179,80 @@ class RecordListViewModel(application: Application) : AndroidViewModel(applicati
             callback(personTypeRepo.getById(id)?.name ?: "未知")
         }
     }
+
+    fun loadStatistics() {
+        viewModelScope.launch {
+            val cal = Calendar.getInstance()
+            val weekStart = getWeekStart(cal)
+            val weekEnd = weekStart + 7 * 24 * 60 * 60 * 1000L
+
+            val summaries = waterRecordRepo.getMonthlySummary(weekStart, weekEnd)
+            val typeId = PreferenceManager.getCurrentTypeId(getApplication())
+            val type = personTypeRepo.getById(typeId)
+            val goal = type?.dailyGoalMl ?: 2500
+
+            if (summaries.isEmpty()) {
+                _statistics.value = null
+                return@launch
+            }
+
+            val dailyAverage = summaries.sumOf { it.total } / summaries.size
+
+            val maxSummary = summaries.maxByOrNull { it.total }
+            val minSummary = summaries.minByOrNull { it.total }
+
+            val records = waterRecordRepo.getByDate(weekStart, weekEnd)
+            val morningCount = records.count { val h = getHour(it.drinkTime); h in 6..11 }
+            val afternoonCount = records.count { val h = getHour(it.drinkTime); h in 12..17 }
+            val eveningCount = records.count { val h = getHour(it.drinkTime); h in 18..23 || h in 0..5 }
+            val peakPeriod = when {
+                morningCount >= afternoonCount && morningCount >= eveningCount -> "上午"
+                afternoonCount >= eveningCount -> "下午"
+                else -> "晚上"
+            }
+
+            val achievedDays = summaries.count { it.total >= goal }
+            val totalDays = summaries.size
+            val achievementRate = achievedDays.toFloat() / totalDays
+
+            _statistics.value = StatisticsResult(
+                dailyAverage = dailyAverage,
+                maxDay = maxSummary?.day,
+                maxAmount = maxSummary?.total ?: 0,
+                minDay = minSummary?.day,
+                minAmount = minSummary?.total ?: 0,
+                peakPeriod = peakPeriod,
+                achievementRate = achievementRate,
+                totalDays = totalDays,
+                achievedDays = achievedDays
+            )
+        }
+    }
+
+    private fun getHour(timestamp: Long): Int {
+        val c = Calendar.getInstance().apply { timeInMillis = timestamp }
+        return c.get(Calendar.HOUR_OF_DAY)
+    }
+
+    private fun getWeekStart(cal: Calendar): Long {
+        val copy = cal.clone() as Calendar
+        copy.set(Calendar.DAY_OF_WEEK, Calendar.MONDAY)
+        copy.set(Calendar.HOUR_OF_DAY, 0)
+        copy.set(Calendar.MINUTE, 0)
+        copy.set(Calendar.SECOND, 0)
+        copy.set(Calendar.MILLISECOND, 0)
+        return copy.timeInMillis
+    }
 }
+
+data class StatisticsResult(
+    val dailyAverage: Int,
+    val maxDay: String?,
+    val maxAmount: Int,
+    val minDay: String?,
+    val minAmount: Int,
+    val peakPeriod: String,
+    val achievementRate: Float,
+    val totalDays: Int,
+    val achievedDays: Int
+)

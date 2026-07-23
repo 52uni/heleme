@@ -31,6 +31,7 @@
         <activity android:name=".ui.persontype.PersonTypeListActivity" />
         <activity android:name=".ui.persontype.PersonTypeEditActivity" />
         <activity android:name=".ui.record.RecordListActivity" />
+        <activity android:name=".ui.AboutActivity" />
 
         <activity
             android:name=".notification.FullscreenReminderActivity"
@@ -48,6 +49,10 @@
         <receiver
             android:name=".receiver.TestReceiver"
             android:exported="true" />
+
+        <receiver
+            android:name=".receiver.NotificationActionReceiver"
+            android:exported="false" />
 
         <receiver
             android:name=".receiver.BootReceiver"

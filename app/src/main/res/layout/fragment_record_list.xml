@@ -83,6 +83,11 @@
             android:layout_height="wrap_content"
             android:text="趋势图" />
 
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="统计" />
+
     </com.google.android.material.tabs.TabLayout>
 
     <com.google.android.material.card.MaterialCardView
@@ -127,6 +132,23 @@
                 android:text="未达标"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExportCsv"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:minWidth="40dp"
+                android:padding="0dp"
+                android:text="导出"
+                android:textSize="12sp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp" />
 
         </LinearLayout>
 
@@ -204,5 +226,34 @@
         </LinearLayout>
 
     </FrameLayout>
+
+    <!-- 统计洞察区域 -->
+    <ScrollView
+        android:id="@+id/statisticsContainer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+        android:padding="12dp">
+
+        <LinearLayout
+            android:id="@+id/statisticsContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tvStatEmpty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="48dp"
+                android:text="本周暂无数据，快去喝水吧～"
+                android:textColor="@color/text_secondary"
+                android:textSize="16sp"
+                android:visibility="visible" />
+
+        </LinearLayout>
+    </ScrollView>
 
 </LinearLayout>

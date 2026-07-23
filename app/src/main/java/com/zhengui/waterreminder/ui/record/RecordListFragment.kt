@@ -1,11 +1,16 @@
 package com.zhengui.waterreminder.ui.record
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
+import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
@@ -21,6 +26,10 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.formatter.ValueFormatter
 import com.zhengui.waterreminder.R
 import com.zhengui.waterreminder.databinding.FragmentRecordListBinding
+import com.zhengui.waterreminder.util.dpToPx
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -66,18 +75,28 @@ class RecordListFragment : Fragment() {
                         binding.recyclerRecords.visibility = View.VISIBLE
                         binding.chartContainer.visibility = View.GONE
                         binding.cardSummary.visibility = View.VISIBLE
+                        binding.statisticsContainer.visibility = View.GONE
                     }
                     1 -> {
                         viewModel.switchToMonthView()
                         binding.recyclerRecords.visibility = View.VISIBLE
                         binding.chartContainer.visibility = View.GONE
                         binding.cardSummary.visibility = View.VISIBLE
+                        binding.statisticsContainer.visibility = View.GONE
                     }
-                    else -> {
+                    2 -> {
                         binding.recyclerRecords.visibility = View.GONE
                         binding.chartContainer.visibility = View.VISIBLE
                         binding.cardSummary.visibility = View.GONE
+                        binding.statisticsContainer.visibility = View.GONE
                         viewModel.loadChartData()
+                    }
+                    3 -> {
+                        binding.recyclerRecords.visibility = View.GONE
+                        binding.chartContainer.visibility = View.GONE
+                        binding.cardSummary.visibility = View.GONE
+                        binding.statisticsContainer.visibility = View.VISIBLE
+                        viewModel.loadStatistics()
                     }
                 }
             }
@@ -114,6 +133,30 @@ class RecordListFragment : Fragment() {
     }
 
     private fun setupObservers() {
+        binding.btnExportCsv.setOnClickListener {
+            val records = viewModel.records.value ?: emptyList()
+            if (records.isEmpty()) {
+                Toast.makeText(requireContext(), "暂无记录可导出", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            lifecycleScope.launch(Dispatchers.IO) {
+                val typeNames = viewModel.typeNames.value ?: emptyMap()
+                val uri = com.zhengui.waterreminder.util.CsvExporter.export(requireContext(), records, typeNames)
+                withContext(Dispatchers.Main) {
+                    if (uri != null) {
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/csv"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        }
+                        startActivity(Intent.createChooser(shareIntent, "导出喝水记录"))
+                    } else {
+                        Toast.makeText(requireContext(), "导出失败", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+
         viewModel.currentDate.observe(viewLifecycleOwner) { cal -> updateDateDisplay(cal) }
 
         viewModel.isDayView.observe(viewLifecycleOwner) { isDayView ->
@@ -148,6 +191,27 @@ class RecordListFragment : Fragment() {
         viewModel.chartData.observe(viewLifecycleOwner) { data ->
             setupBarChart(data)
             setupLineChart(data)
+        }
+
+        viewModel.statistics.observe(viewLifecycleOwner) { stats ->
+            val content = binding.statisticsContent
+            val emptyText = binding.tvStatEmpty
+            content.removeAllViews()
+            content.addView(emptyText)
+
+            if (stats == null) {
+                emptyText.visibility = View.VISIBLE
+                return@observe
+            }
+            emptyText.visibility = View.GONE
+
+            val blueColor = ContextCompat.getColor(requireContext(), R.color.blue_primary)
+
+            content.addView(createStatCard("本周日均饮水量", "${stats.dailyAverage} ml", blueColor))
+            content.addView(createStatCard("喝水最多的一天", "${stats.maxDay ?: "-"}  ${stats.maxAmount}ml", blueColor))
+            content.addView(createStatCard("喝水最少的一天", "${stats.minDay ?: "-"}  ${stats.minAmount}ml", blueColor))
+            content.addView(createStatCard("最活跃时段", stats.peakPeriod, blueColor))
+            content.addView(createStatCard("本周达标率", "${stats.achievedDays}/${stats.totalDays}天  ${(stats.achievementRate * 100).toInt()}%", blueColor))
         }
     }
 
@@ -363,6 +427,45 @@ class RecordListFragment : Fragment() {
             moveViewToX(entries.size.toFloat())
             animateX(600)
             invalidate()
+        }
+    }
+
+    private fun createStatCard(label: String, value: String, valueColor: Int): com.google.android.material.card.MaterialCardView {
+        return com.google.android.material.card.MaterialCardView(requireContext()).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = 12.dpToPx()
+            }
+            cardElevation = 4.dpToPx().toFloat()
+            radius = 12.dpToPx().toFloat()
+            setCardBackgroundColor(ContextCompat.getColor(context, R.color.card_background))
+
+            val innerLayout = LinearLayout(context).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(16.dpToPx(), 12.dpToPx(), 16.dpToPx(), 12.dpToPx())
+            }
+
+            val labelTv = TextView(context).apply {
+                text = label
+                textSize = 13f
+                setTextColor(ContextCompat.getColor(context, R.color.text_secondary))
+            }
+            val valueTv = TextView(context).apply {
+                text = value
+                textSize = 18f
+                setTextColor(valueColor)
+                setTypeface(null, android.graphics.Typeface.BOLD)
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                ).apply { topMargin = 4.dpToPx() }
+            }
+
+            innerLayout.addView(labelTv)
+            innerLayout.addView(valueTv)
+            addView(innerLayout)
         }
     }
 
