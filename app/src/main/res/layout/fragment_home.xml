@@ -21,14 +21,15 @@
             android:layout_marginTop="@dimen/spacing_md"
             android:layout_marginEnd="@dimen/spacing_md"
             android:layout_marginBottom="@dimen/spacing_md"
-            app:cardBackgroundColor="@android:color/transparent"
+            app:cardBackgroundColor="@color/card_background"
             app:cardCornerRadius="@dimen/card_radius"
-            app:cardElevation="@dimen/card_elevation_mid">
+            app:cardElevation="@dimen/card_elevation_mid"
+            app:strokeWidth="1dp"
+            app:strokeColor="#F0F0F0">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/gradient_blue_card"
                 android:gravity="center"
                 android:orientation="vertical"
                 android:paddingStart="@dimen/spacing_lg"
@@ -40,7 +41,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="今日饮水进度"
-                    android:textColor="@color/white"
+                    android:textColor="@color/text_primary"
                     android:textSize="17sp"
                     android:textStyle="bold" />
 
@@ -48,9 +49,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:alpha="0.82"
                     android:text="慢慢喝，稳定达标"
-                    android:textColor="@color/white"
+                    android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 
                 <com.zhengui.waterreminder.ui.widget.WaterWaveProgressView
@@ -58,16 +58,16 @@
                     android:layout_width="@dimen/progress_circle_size"
                     android:layout_height="@dimen/progress_circle_size"
                     android:layout_marginTop="@dimen/spacing_lg"
-                    app:bgColor="@color/blue_dark"
+                    app:bgColor="@color/card_background"
                     app:maxProgress="100"
                     app:progress="0"
-                    app:textColor="@android:color/white"
-                    app:waveColor="@color/blue_primary"
-                    app:waveColor2="@color/blue_light" />
+                    app:textColor="@color/text_primary"
+                    app:waveColor="@color/blue_primary" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="end"
                     android:layout_marginTop="@dimen/spacing_md"
                     android:gravity="bottom"
                     android:orientation="horizontal">
@@ -77,37 +77,36 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="0"
-                        android:textColor="@color/white"
-                        android:textSize="38sp"
-                        android:textStyle="bold" />
+                        android:textColor="@color/text_primary"
+                        android:textSize="19sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_marginBottom="7dp"
+                        android:layout_marginStart="3dp"
+                        android:layout_marginBottom="3dp"
                         android:text="/"
-                        android:textColor="@color/white"
-                        android:textSize="18sp" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/tvGoalAmount"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_marginBottom="7dp"
+                        android:layout_marginStart="3dp"
+                        android:layout_marginBottom="3dp"
                         android:text="2500"
-                        android:textColor="@color/white"
-                        android:textSize="22sp" />
+                        android:textColor="@color/text_primary"
+                        android:textSize="19sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginStart="4dp"
-                        android:layout_marginBottom="7dp"
+                        android:layout_marginStart="3dp"
+                        android:layout_marginBottom="3dp"
                         android:text="ml"
-                        android:textColor="@color/white"
-                        android:textSize="15sp" />
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
 
                 </LinearLayout>
 
@@ -116,10 +115,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/spacing_sm"
-                    android:alpha="0.88"
                     android:text="连续达标 0 天"
-                    android:textColor="@color/white"
+                    android:textColor="@color/text_secondary"
                     android:textSize="14sp" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvTodayRecords"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:nestedScrollingEnabled="false"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tvGoalReached"
@@ -129,7 +135,7 @@
                     android:drawableStart="@drawable/ic_check"
                     android:drawablePadding="6dp"
                     android:text="今日目标已达成"
-                    android:textColor="@color/mint_soft"
+                    android:textColor="@color/green_success"
                     android:textSize="14sp"
                     android:visibility="gone" />
 

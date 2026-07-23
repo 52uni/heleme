@@ -4,11 +4,9 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.RectF
-import android.graphics.Shader
 import android.util.AttributeSet
 import android.util.Log
 import android.view.View
@@ -26,42 +24,33 @@ class WaterWaveProgressView @JvmOverloads constructor(
         private const val TAG = "WaterWaveProgress"
     }
 
-    private var waveColor: Int = Color.parseColor("#2196F3")
-    private var waveColor2: Int = Color.parseColor("#64B5F6")
-    private var bgColor: Int = Color.parseColor("#E3F2FD")
-    private var textColor: Int = Color.WHITE
+    private var waveColor: Int = Color.parseColor("#1677FF")
+    private var bgColor: Int = Color.parseColor("#FFFFFF")
+    private var textColor: Int = Color.parseColor("#1677FF")
     private var progressValue: Int = 0
     private var maxProgressValue: Int = 100
 
-    // 动画相关
     private var currentProgress: Float = 0f
     private var waveOffset: Float = 0f
 
-    // 画笔
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val wavePaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val wavePaint2 = Paint(Paint.ANTI_ALIAS_FLAG)
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val borderPaint = Paint(Paint.ANTI_ALIAS_FLAG)
 
-    // 圆形区域
     private val rectF = RectF()
 
     init {
-        Log.d(TAG, "init 开始")
         try {
             attrs?.let {
-                Log.d(TAG, "开始读取 XML 属性")
                 val ta = context.obtainStyledAttributes(it, R.styleable.WaterWaveProgressView)
-                Log.d(TAG, "obtainStyledAttributes 成功")
                 waveColor = ta.getColor(R.styleable.WaterWaveProgressView_waveColor, waveColor)
-                waveColor2 = ta.getColor(R.styleable.WaterWaveProgressView_waveColor2, waveColor2)
                 bgColor = ta.getColor(R.styleable.WaterWaveProgressView_bgColor, bgColor)
                 textColor = ta.getColor(R.styleable.WaterWaveProgressView_textColor, textColor)
                 progressValue = ta.getInt(R.styleable.WaterWaveProgressView_progress, 0)
                 maxProgressValue = ta.getInt(R.styleable.WaterWaveProgressView_maxProgress, 100)
                 ta.recycle()
-                Log.d(TAG, "XML 属性读取完成: waveColor=$waveColor, bgColor=$bgColor, progress=$progressValue")
             }
 
             bgPaint.color = bgColor
@@ -70,9 +59,9 @@ class WaterWaveProgressView @JvmOverloads constructor(
             borderPaint.color = waveColor
             textPaint.color = textColor
             textPaint.textAlign = Paint.Align.CENTER
+            textPaint.setShadowLayer(3f, 0f, 1f, Color.argb(60, 255, 255, 255))
 
             currentProgress = progressValue.toFloat()
-            Log.d(TAG, "init 完成")
         } catch (e: Exception) {
             Log.e(TAG, "init 失败", e)
             throw e
@@ -117,25 +106,24 @@ class WaterWaveProgressView @JvmOverloads constructor(
 
         rectF.set(cx - radius, cy - radius, cx + radius, cy + radius)
 
-        // 绘制背景圆
+        // 1. 绘制背景圆
         canvas.drawCircle(cx, cy, radius, bgPaint)
 
-        // 绘制水波纹
+        // 2. 计算水位
         val waterLevel = cy + radius - (2 * radius * currentProgress / maxProgressValue)
 
-        // 设置渐变
-        val shader1 = LinearGradient(cx, waterLevel, cx, cy + radius, waveColor, waveColor2, Shader.TileMode.CLAMP)
-        wavePaint.shader = shader1
+        // 3. 波浪纯色
+        wavePaint.shader = null
+        wavePaint.color = waveColor
+        wavePaint2.shader = null
+        wavePaint2.color = waveColor
 
-        val shader2 = LinearGradient(cx, waterLevel, cx, cy + radius, waveColor2, waveColor, Shader.TileMode.CLAMP)
-        wavePaint2.shader = shader2
-
-        // 波浪路径1
-        val wavePath1 = Path()
-        val wavePath2 = Path()
+        // 4. 波浪路径
         val amplitude = 8f
         val wavelength = size / 2f
 
+        val wavePath1 = Path()
+        val wavePath2 = Path()
         wavePath1.moveTo(cx - radius, cy + radius)
         wavePath2.moveTo(cx - radius, cy + radius)
 
@@ -153,27 +141,25 @@ class WaterWaveProgressView @JvmOverloads constructor(
         wavePath2.lineTo(cx + radius, cy + radius)
         wavePath2.close()
 
-        // 裁剪到圆形区域
+        // 5. 裁剪到圆形，绘制波浪
         canvas.save()
         val clipPath = Path()
         clipPath.addCircle(cx, cy, radius - 2f, Path.Direction.CW)
         canvas.clipPath(clipPath)
-
         canvas.drawPath(wavePath1, wavePaint)
         canvas.drawPath(wavePath2, wavePaint2)
-
         canvas.restore()
 
-        // 绘制边框
+        // 6. 绘制边框
         canvas.drawCircle(cx, cy, radius, borderPaint)
 
-        // 绘制百分比文字
+        // 7. 绘制百分比文字
         val percent = if (maxProgressValue > 0) (currentProgress * 100 / maxProgressValue).toInt() else 0
         textPaint.textSize = size / 4f
         val textY = cy - (textPaint.descent() + textPaint.ascent()) / 2f
         canvas.drawText("${percent}%", cx, textY, textPaint)
 
-        // 更新波浪偏移
+        // 8. 波浪动画
         waveOffset += 0.08f
         if (waveOffset > 2 * Math.PI) waveOffset = 0f
         invalidate()

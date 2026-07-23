@@ -5,9 +5,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
 
     <application
         android:name=".App"
@@ -31,6 +30,15 @@
         <activity android:name=".ui.persontype.PersonTypeEditActivity" />
         <activity android:name=".ui.record.RecordListActivity" />
 
+        <activity
+            android:name=".notification.FullscreenReminderActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:launchMode="singleInstance"
+            android:showOnLockScreen="true"
+            android:turnScreenOn="true"
+            android:theme="@style/Theme.WaterReminder" />
+
         <receiver
             android:name=".receiver.ReminderReceiver"
             android:exported="false" />
@@ -48,10 +56,35 @@
             </intent-filter>
         </receiver>
 
-        <service
-            android:name=".service.KeepAliveService"
-            android:exported="false"
-            android:foregroundServiceType="specialUse" />
+        <receiver
+            android:name=".widget.WidgetDrinkReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.zhengui.waterreminder.ACTION_DRINK_WIDGET" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".widget.WaterWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/water_widget_small_info" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.WaterWidgetLargeProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/water_widget_large_info" />
+        </receiver>
 
     </application>
 

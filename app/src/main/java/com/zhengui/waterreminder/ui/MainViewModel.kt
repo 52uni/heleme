@@ -8,10 +8,12 @@ import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.zhengui.waterreminder.App
 import com.zhengui.waterreminder.data.entity.PersonType
+import com.zhengui.waterreminder.data.entity.WaterRecord
 import com.zhengui.waterreminder.data.repository.PersonTypeRepository
 import com.zhengui.waterreminder.data.repository.WaterRecordRepository
 import com.zhengui.waterreminder.service.WaterReminderService
 import com.zhengui.waterreminder.service.ReminderScheduler
+import com.zhengui.waterreminder.widget.WidgetUpdateHelper
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -35,6 +37,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
     private val _streakDays = MutableLiveData(0)
     val streakDays: LiveData<Int> = _streakDays
 
+    private val _dailyRecords = MutableLiveData<List<WaterRecord>>(emptyList())
+    val dailyRecords: LiveData<List<WaterRecord>> = _dailyRecords
+
     val allPersonTypes: LiveData<List<PersonType>> = personTypeRepo.getAllTypesFlow().asLiveData()
 
     init {
@@ -55,19 +60,24 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             val total = waterRecordRepo.getDailyTotal(dayStart, dayEnd)
             _dailyTotal.value = total
 
+            val records = waterRecordRepo.getByDate(dayStart, dayEnd)
+            _dailyRecords.value = records
+
             val typeId = WaterReminderService.getCurrentTypeId(getApplication())
             val type = personTypeRepo.getById(typeId)
             _currentType.value = type
             _dailyGoal.value = type?.dailyGoalMl ?: 2500
 
-            val streakCal = Calendar.getInstance()
+            val streakCal = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+                add(Calendar.DAY_OF_YEAR, -1) // 从昨天开始往前数
+            }
             var streak = 0
             val goalMl = type?.dailyGoalMl ?: 2500
             for (i in 0 until 365) {
-                streakCal.set(Calendar.HOUR_OF_DAY, 0)
-                streakCal.set(Calendar.MINUTE, 0)
-                streakCal.set(Calendar.SECOND, 0)
-                streakCal.set(Calendar.MILLISECOND, 0)
                 val dStart = streakCal.timeInMillis
                 val dEnd = dStart + 24 * 60 * 60 * 1000L
                 val dayTotal = waterRecordRepo.getDailyTotal(dStart, dEnd)
@@ -80,6 +90,9 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             }
             _streakDays.value = streak
             isReminderEnabled.value = WaterReminderService.isReminderEnabled(getApplication())
+
+            // 数据刷新后同步小组件
+            WidgetUpdateHelper.updateAllWidgets(getApplication())
         }
     }
 
@@ -102,6 +115,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
             if (WaterReminderService.isReminderEnabled(getApplication())) {
                 ReminderScheduler.scheduleAfterDrink(getApplication())
             }
+            refreshData()
+        }
+    }
+
+    fun deleteRecord(record: WaterRecord) {
+        viewModelScope.launch {
+            waterRecordRepo.deleteById(record.id)
             refreshData()
         }
     }

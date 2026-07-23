@@ -125,11 +125,12 @@ object ReminderScheduler {
                 } else {
                     scheduleAlarm(context, effectiveTriggerTime, defaultAmount)
                 }
+
+                WaterReminderService.setReminderEnabled(context, true)
             } catch (e: Exception) {
                 Log.e(TAG, "调度间隔提醒失败", e)
             }
         }
-        WaterReminderService.setReminderEnabled(context, true)
     }
 
     /**
@@ -348,11 +349,12 @@ object ReminderScheduler {
 
                     scheduleExactAlarm(alarmManager, triggerTime, pendingIntent, context)
                 }
+
+                WaterReminderService.setReminderEnabled(context, true)
             } catch (e: Exception) {
                 Log.e(TAG, "调度固定时间提醒失败", e)
             }
         }
-        WaterReminderService.setReminderEnabled(context, true)
     }
 
     /**

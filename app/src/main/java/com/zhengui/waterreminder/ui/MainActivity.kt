@@ -22,7 +22,7 @@ import com.google.android.material.switchmaterial.SwitchMaterial
 import com.zhengui.waterreminder.R
 import com.zhengui.waterreminder.databinding.ActivityMainBinding
 import com.zhengui.waterreminder.notification.NotificationHelper
-import com.zhengui.waterreminder.service.KeepAliveService
+
 import com.zhengui.waterreminder.service.ReminderScheduler
 import com.zhengui.waterreminder.service.WaterReminderService
 import com.zhengui.waterreminder.ui.home.HomeFragment
@@ -99,7 +99,6 @@ class MainActivity : AppCompatActivity() {
                 requestAutoStartPermissions(autoStartSwitch)
             } else {
                 WaterReminderService.setAutoStartEnabled(this, false)
-                KeepAliveService.stop(this)
                 Toast.makeText(this, "已关闭自动启动", Toast.LENGTH_SHORT).show()
             }
         }
@@ -194,9 +193,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun enableAutoStart(autoStartSwitch: SwitchMaterial) {
-        // 先保存设置并启动前台服务
+        // 先保存设置
         WaterReminderService.setAutoStartEnabled(this, true)
-        KeepAliveService.start(this)
 
         // 尝试引导用户开启系统自启动权限（各厂商设置页）
         if (!hasAutoStartPermission()) {

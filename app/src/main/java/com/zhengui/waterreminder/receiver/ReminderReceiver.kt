@@ -5,11 +5,14 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import com.zhengui.waterreminder.App
+import com.zhengui.waterreminder.notification.FullscreenReminderActivity
 import com.zhengui.waterreminder.notification.NotificationHelper
 import com.zhengui.waterreminder.service.ReminderScheduler
 import com.zhengui.waterreminder.service.WaterReminderService
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -22,7 +25,11 @@ class ReminderReceiver : BroadcastReceiver() {
         private const val TAG = "ReminderReceiver"
     }
 
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val exceptionHandler = CoroutineExceptionHandler { _, e ->
+        Log.e(TAG, "ReminderReceiver 协程异常", e)
+    }
+
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + exceptionHandler)
 
     override fun onReceive(context: Context, intent: Intent) {
         val now = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.getDefault()).format(Date())
@@ -66,7 +73,8 @@ class ReminderReceiver : BroadcastReceiver() {
                             // 在通知时段内，弹通知并继续小周期
                             val notificationHelper = NotificationHelper(context)
                             notificationHelper.createChannel()
-                            notificationHelper.showReminderNotification(suggestedAmount)
+                            notificationHelper.showSmallCycleReminderNotification(suggestedAmount)
+                            launchFullScreenReminder(context, suggestedAmount, FullscreenReminderActivity.TYPE_SMALL_CYCLE)
                             Log.d(TAG, "小周期: 弹通知，继续调度5分钟后小周期")
                             ReminderScheduler.scheduleSmallCycle(context, suggestedAmount)
                         }
@@ -81,7 +89,7 @@ class ReminderReceiver : BroadcastReceiver() {
                 try {
                     val notificationHelper = NotificationHelper(context)
                     notificationHelper.createChannel()
-                    notificationHelper.showReminderNotification(suggestedAmount)
+                    notificationHelper.showSmallCycleReminderNotification(suggestedAmount)
                 } finally {
                     pendingResult.finish()
                 }
@@ -102,7 +110,8 @@ class ReminderReceiver : BroadcastReceiver() {
                 if (inPeriod) {
                     val notificationHelper = NotificationHelper(context)
                     notificationHelper.createChannel()
-                    notificationHelper.showReminderNotification(suggestedAmount)
+                    notificationHelper.showIntervalReminderNotification(suggestedAmount)
+                    launchFullScreenReminder(context, suggestedAmount, FullscreenReminderActivity.TYPE_INTERVAL)
                     Log.d(TAG, "间隔提醒: 已弹通知")
                 }
 
@@ -138,11 +147,17 @@ class ReminderReceiver : BroadcastReceiver() {
             val notificationHelper = NotificationHelper(context)
             notificationHelper.createChannel()
             notificationHelper.showFixedReminderNotification(label, suggestedAmount)
+            launchFullScreenReminder(context, suggestedAmount, FullscreenReminderActivity.TYPE_FIXED)
             Log.d(TAG, "固定时间提醒: 已弹通知 (label=$label)")
 
             if (reminderTimeId > 0 && hour >= 0 && minute >= 0 && WaterReminderService.isReminderEnabled(context)) {
-                ReminderScheduler.scheduleFixedReminderToTomorrow(context, reminderTimeId, hour, minute)
-                Log.d(TAG, "固定时间提醒: 已调度到明天 $hour:$minute")
+                try {
+                    ReminderScheduler.scheduleFixedReminderToTomorrow(context, reminderTimeId, hour, minute)
+                    Log.d(TAG, "固定时间提醒: 已调度到明天 $hour:$minute")
+                } catch (e: Exception) {
+                    Log.e(TAG, "固定时间提醒调度明天失败，回退全量调度", e)
+                    ReminderScheduler.scheduleAllReminders(context)
+                }
             } else {
                 Log.d(TAG, "固定时间提醒: 跳过重新调度 (reminderTimeId=$reminderTimeId, hour=$hour, minute=$minute, enabled=${WaterReminderService.isReminderEnabled(context)})")
             }
@@ -173,6 +188,23 @@ class ReminderReceiver : BroadcastReceiver() {
             currentMinutes in startMinutes..endMinutes
         } else {
             currentMinutes >= startMinutes || currentMinutes <= endMinutes
+        }
+    }
+
+    /**
+     * 直接启动全屏提醒Activity，不依赖通知的fullScreenIntent（国产ROM常拦截）
+     */
+    private fun launchFullScreenReminder(context: Context, amount: Int, reminderType: String) {
+        try {
+            val intent = Intent(context, FullscreenReminderActivity::class.java).apply {
+                putExtra(FullscreenReminderActivity.EXTRA_REMINDER_TYPE, reminderType)
+                putExtra(FullscreenReminderActivity.EXTRA_AMOUNT, amount)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(intent)
+            Log.d(TAG, "已启动全屏提醒: type=$reminderType, amount=$amount")
+        } catch (e: Exception) {
+            Log.e(TAG, "启动全屏提醒失败", e)
         }
     }
 }

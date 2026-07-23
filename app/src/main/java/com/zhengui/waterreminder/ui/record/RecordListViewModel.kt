@@ -108,7 +108,10 @@ class RecordListViewModel(application: Application) : AndroidViewModel(applicati
         viewModelScope.launch {
             _isLoading.value = true
             val cal = _currentDate.value ?: return@launch
-            _monthlySummaries.value = waterRecordRepo.getMonthlySummary(getMonthStart(cal), getMonthEnd(cal))
+            val monthStart = getMonthStart(cal)
+            val monthEnd = getMonthEnd(cal)
+            _monthlySummaries.value = waterRecordRepo.getMonthlySummary(monthStart, monthEnd)
+            _dailyTotal.value = waterRecordRepo.getDailyTotal(monthStart, monthEnd) ?: 0
 
             val typeId = WaterReminderService.getCurrentTypeId(getApplication())
             val type = personTypeRepo.getById(typeId)

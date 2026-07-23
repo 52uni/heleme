@@ -69,4 +69,10 @@ dependencies {
 
     // Fragment
     implementation("androidx.fragment:fragment-ktx:1.6.2")
+
+    // Glide (GIF support)
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+
+    // FlexboxLayout (流式布局)
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 }

@@ -16,9 +16,9 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@drawable/gradient_blue_card"
             android:title="人群类型管理"
-            android:titleTextColor="@color/white"
+            android:titleTextColor="?attr/colorOnPrimary"
             app:navigationIcon="@drawable/ic_back"
-            app:navigationIconTint="@color/white" />
+            app:navigationIconTint="?attr/colorOnPrimary" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerPersonTypes"

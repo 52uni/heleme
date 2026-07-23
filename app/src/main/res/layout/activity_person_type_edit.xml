@@ -17,9 +17,9 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@drawable/gradient_blue_toolbar"
             android:title="编辑人群类型"
-            android:titleTextColor="@color/white"
+            android:titleTextColor="?attr/colorOnPrimary"
             app:navigationIcon="@drawable/ic_back"
-            app:navigationIconTint="@color/white" />
+            app:navigationIconTint="?attr/colorOnPrimary" />
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"

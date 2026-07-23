@@ -17,9 +17,9 @@
             android:background="@drawable/gradient_blue_toolbar"
             android:elevation="0dp"
             android:title="@string/app_name"
-            android:titleTextColor="@color/white"
+            android:titleTextColor="?attr/colorOnPrimary"
             app:navigationIcon="@drawable/ic_menu"
-            app:navigationIconTint="@color/white" />
+            app:navigationIconTint="?attr/colorOnPrimary" />
 
         <FrameLayout
             android:id="@+id/fragmentContainer"

@@ -5,6 +5,34 @@
     <string name="channel_description">定时提醒你喝水</string>
     <string name="reminder_notification_title">该喝水了</string>
     <string name="reminder_notification_text">建议饮用 %d ml 水</string>
+
+    <string-array name="interval_reminder_titles">
+        <item>该喝水啦～</item>
+        <item>嗨，喝水时间到！</item>
+        <item>别忘了喝水哦～</item>
+        <item>来一杯水吧！</item>
+        <item>喝口水歇一歇～</item>
+        <item>水水时间到！</item>
+        <item>该补充水分啦～</item>
+        <item>喝水喝水，身体健康！</item>
+        <item>乖，去喝杯水～</item>
+        <item>滴滴！喝水提醒～</item>
+    </string-array>
+
+    <string-array name="small_cycle_reminder_titles">
+        <item>你真的打算不喝水吗？</item>
+        <item>水杯都等急了！</item>
+        <item>再不喝水要干成标本啦～</item>
+        <item>我盯着你呢，快去喝水！</item>
+        <item>你忍心让自己渴着吗？</item>
+        <item>别装没看见，喝水！</item>
+        <item>老板不在，偷偷喝口水吧～</item>
+        <item>你已经很久没喝水了哦</item>
+        <item>水在召唤你，听到了吗？</item>
+        <item>喝水！现在！立刻！马上！</item>
+        <item>你比仙人掌还耐旱吗？</item>
+        <item>再不喝我就一直弹哦～</item>
+    </string-array>
     <string name="service_notification_title">喝水提醒服务</string>
     <string name="service_notification_text">正在运行中，保持水分摄入</string>
     <string name="btn_start_reminder">开启提醒</string>
@@ -29,4 +57,6 @@
     <string name="reminder_label_hint">如：早起喝水、午休补水</string>
     <string name="fixed_reminder_title">%s · 该喝水了</string>
     <string name="save">保存</string>
+    <string name="widget_small_desc">喝水进度小组件 - 显示今日饮水进度</string>
+    <string name="widget_large_desc">喝水进度大组件 - 显示进度并可快速记录喝水</string>
 </resources>

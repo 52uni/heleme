@@ -17,6 +17,7 @@ app/build/
 *.apk
 *.aab
 *.ap_
+!dist/*.apk
 
 # OS
 .DS_Store
@@ -34,3 +35,9 @@ crash.txt
 *.jks
 *.keystore
 *.p12
+
+# Dev artifacts
+你真棒/
+你真棒.zip
+ui-prototypes/
+.agents/
