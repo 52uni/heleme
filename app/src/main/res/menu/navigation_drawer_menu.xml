@@ -16,13 +16,6 @@
             android:title="人群类型" />
     </group>
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_check_update"
-            android:icon="@drawable/ic_download"
-            android:title="检查更新" />
-    </group>
-
     <group android:id="@+id/group_switches">
         <item
             android:id="@+id/nav_reminder_switch"
@@ -34,5 +27,12 @@
             android:icon="@drawable/ic_power"
             android:title="自动启动"
             app:actionLayout="@layout/nav_item_switch" />
+    </group>
+
+    <group>
+        <item
+            android:id="@+id/nav_check_update"
+            android:icon="@drawable/ic_download"
+            android:title="检查更新" />
     </group>
 </menu>
