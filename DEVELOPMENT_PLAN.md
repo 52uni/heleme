@@ -145,3 +145,34 @@
 | v1.2 | P1 功能：日历热力图 + 静默时段 + 主题图标 |
 | v1.3 | 代码优化项 + 单元测试 |
 | v2.0 | P2 功能 + 技术债务清理 |
+
+---
+
+## 五、Git 双平台提交流程
+
+项目同时维护 GitHub 和 Gitee 两个远程仓库：
+
+```powershell
+# 提交代码
+git add -A .
+git commit -m "提交说明"
+git push origin master    # GitHub
+git push gitee master     # Gitee
+
+# 发版时额外打标签
+git tag vX.X
+git push origin master --tags
+git push gitee master --tags
+```
+
+### 远程仓库配置
+
+```
+origin  -> git@github.com:52uni/heleme.git
+gitee   -> https://gitee.com/gui_1124/heleme.git
+```
+
+### Token（用于 API 操作）
+
+- GitHub Token: 已记忆到全局记忆库
+- Gitee Token: 已记忆到全局记忆库
