@@ -29,6 +29,11 @@ import com.zhengui.waterreminder.ui.home.HomeFragment
 import com.zhengui.waterreminder.ui.persontype.PersonTypeListFragment
 import com.zhengui.waterreminder.ui.record.RecordListFragment
 import com.zhengui.waterreminder.ui.remindertime.ReminderTimeFragment
+import com.zhengui.waterreminder.util.UpdateManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
@@ -65,6 +70,11 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.nav_person_types -> {
                     showSection("人群类型", PersonTypeListFragment(), R.id.nav_person_types)
+                    true
+                }
+                R.id.nav_check_update -> {
+                    closeDrawer()
+                    checkForUpdate()
                     true
                 }
                 else -> false
@@ -372,5 +382,41 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val REQUEST_CODE_BATTERY_OPTIMIZATION = 200
+    }
+
+    private fun checkForUpdate() {
+        Toast.makeText(this, "正在检查更新...", Toast.LENGTH_SHORT).show()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val info = UpdateManager.checkForUpdate(this@MainActivity)
+                if (info != null) {
+                    withContext(Dispatchers.Main) {
+                        showUpdateDialog(info)
+                    }
+                } else {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@MainActivity, R.string.update_already_latest, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@MainActivity, R.string.update_check_failed, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    private fun showUpdateDialog(info: UpdateManager.UpdateInfo) {
+        val changelog = info.body.ifBlank { "无更新说明" }
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("${getString(R.string.update_new_version)} v${info.versionName}")
+            .setMessage("版本号: ${info.tagName}\n\n${changelog.take(500)}")
+            .setPositiveButton(R.string.update_now) { _, _ ->
+                CoroutineScope(Dispatchers.IO).launch {
+                    UpdateManager.downloadAndInstall(this@MainActivity, info)
+                }
+            }
+            .setNegativeButton(R.string.update_later, null)
+            .show()
     }
 }
