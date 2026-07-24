@@ -9,22 +9,16 @@
 <meta name="author" content="LiuZane/Uni">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://heleme.vercel.app">
-
-<!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:title" content="喝水提醒 — 极简黑白风开源饮水追踪 App">
 <meta property="og:description" content="四种人群模式 · 日历达标可视化 · 趋势柱状图 · 全屏提醒 · 桌面小部件。免费开源。">
 <meta property="og:url" content="https://heleme.vercel.app">
 <meta property="og:site_name" content="喝水提醒 Heleme">
 <meta property="og:locale" content="zh_CN">
-
-<!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="喝水提醒 — 极简黑白风开源 Android 饮水追踪 App">
 <meta name="twitter:description" content="四种人群模式 · 日历达标可视化 · 趋势柱状图 · 全屏提醒 · 桌面小部件。免费开源。">
 <meta name="twitter:creator" content="@LiuZane">
-
-<!-- JSON-LD Structured Data -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -40,10 +34,6 @@
 }
 </script>
 <style>
-/* =========================================================
-   Promo Slides — 黑白极简 · 重点突出 · 自动翻页
-   移动端自适应 · SEO 优化
-   ========================================================= */
 :root {
   --ink:    #111;
   --ink-2:  #1F1F1F;
@@ -52,45 +42,28 @@
   --rule:   #E5E5E5;
   --rule-2: #F0F0F0;
   --paper:  #FFF;
-  --paper-2:#FAFAF7;
   --font-zh: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
   --font-en: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-mono: "SF Mono", Consolas, "Liberation Mono", Menlo, Courier, monospace;
   --ease: cubic-bezier(0.22, 0.1, 0.2, 1);
 }
-
 * { box-sizing: border-box; margin: 0; padding: 0; }
-
 html, body {
   height: 100%; height: 100dvh;
-  background: #111;
-  font-family: var(--font-zh);
-  overflow: hidden;
-  user-select: none;
+  background: #111; font-family: var(--font-zh);
+  overflow: hidden; user-select: none;
   -webkit-tap-highlight-color: transparent;
   touch-action: pan-y;
 }
+.stage { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
 
-.stage {
-  width: 100%; height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 桌面端 16:9 画布 */
 .canvas {
-  width: min(100vw, 177.78vh);
-  height: min(100vh, 56.25vw);
-  background: var(--paper);
-  position: relative;
-  overflow: hidden;
+  width: min(100vw, 177.78vh); height: min(100vh, 56.25vw);
+  background: var(--paper); position: relative; overflow: hidden;
   box-shadow: 0 0 80px rgba(0,0,0,0.5);
 }
 
-/* ---- Slides ---- */
 .slides { position: absolute; inset: 0; }
-
 .slide {
   position: absolute; inset: 0;
   display: flex; flex-direction: column;
@@ -101,299 +74,126 @@ html, body {
   pointer-events: none;
 }
 .slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
-
-/* 左右分栏 */
 .slide.split { flex-direction: row; gap: 5%; padding: 6% 7%; }
 .slide.split > div:first-child { flex: 1; display: flex; flex-direction: column; justify-content: center; }
 .slide.split > div:last-child { flex: 1; display: flex; align-items: center; justify-content: center; }
 
-/* 顶部标签 */
 .tag {
-  font-family: var(--font-mono);
-  font-size: clamp(10px, 1.1vw, 13px);
-  letter-spacing: 3.5px;
-  color: var(--ink-3);
-  text-transform: uppercase;
-  border-top: 1px solid var(--ink-3);
-  border-bottom: 1px solid var(--ink-3);
-  padding: 5px 0;
-  margin-bottom: 20px;
+  font-family: var(--font-mono); font-size: clamp(10px, 1.1vw, 13px);
+  letter-spacing: 3.5px; color: var(--ink-3); text-transform: uppercase;
+  border-top: 1px solid var(--ink-3); border-bottom: 1px solid var(--ink-3);
+  padding: 5px 0; margin-bottom: 20px;
 }
 
-/* 黑底高亮数字块 */
 .hl-box {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--ink); color: var(--paper);
   padding: clamp(18px, 2.5vw, 36px) clamp(28px, 4vw, 56px);
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
+  display: inline-flex; flex-direction: column; align-items: center;
 }
-.hl-box .num {
-  font-family: var(--font-en);
-  font-size: clamp(60px, 9vw, 130px);
-  font-weight: 600;
-  line-height: 0.85;
-}
-.hl-box .label {
-  font-size: clamp(13px, 1.5vw, 20px);
-  letter-spacing: 3px;
-  margin-top: 8px;
-  opacity: 0.7;
-}
+.hl-box .num { font-family: var(--font-en); font-size: clamp(60px, 9vw, 130px); font-weight: 600; line-height: 0.85; }
+.hl-box .label { font-size: clamp(13px, 1.5vw, 20px); letter-spacing: 3px; margin-top: 8px; opacity: 0.7; }
 
-/* 章节标签 */
-.s-num {
-  font-family: var(--font-mono);
-  font-size: clamp(11px, 1.2vw, 14px);
-  letter-spacing: 3px;
-  color: var(--ink-3);
-  margin-bottom: 8px;
-}
-.s-title {
-  font-weight: 700;
-  font-size: clamp(32px, 4.5vw, 56px);
-  color: var(--ink);
-  line-height: 1.1;
-  margin-bottom: 16px;
-}
+.s-num { font-family: var(--font-mono); font-size: clamp(11px, 1.2vw, 14px); letter-spacing: 3px; color: var(--ink-3); margin-bottom: 8px; }
+.s-title { font-weight: 700; font-size: clamp(32px, 4.5vw, 56px); color: var(--ink); line-height: 1.1; margin-bottom: 16px; }
 
-/* ---- 高亮要点条 ---- */
 .highlights {
-  display: flex;
-  gap: clamp(16px, 2vw, 28px);
-  margin-top: clamp(20px, 3vw, 36px);
-  flex-wrap: wrap;
-  justify-content: center;
+  display: flex; gap: clamp(16px, 2vw, 28px);
+  margin-top: clamp(20px, 3vw, 36px); flex-wrap: wrap; justify-content: center;
 }
 .hl-item {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--ink); color: var(--paper);
   padding: clamp(14px, 1.8vw, 22px) clamp(20px, 2.5vw, 32px);
-  text-align: center;
-  min-width: clamp(120px, 14vw, 180px);
+  text-align: center; min-width: clamp(120px, 14vw, 180px);
 }
-.hl-item .n {
-  font-family: var(--font-en);
-  font-size: clamp(36px, 5vw, 64px);
-  font-weight: 600;
-  line-height: 1;
-}
-.hl-item .t {
-  font-size: clamp(11px, 1.2vw, 14px);
-  margin-top: 6px;
-  letter-spacing: 1.5px;
-  opacity: 0.75;
-}
+.hl-item .n { font-family: var(--font-en); font-size: clamp(36px, 5vw, 64px); font-weight: 600; line-height: 1; }
+.hl-item .t { font-size: clamp(11px, 1.2vw, 14px); margin-top: 6px; letter-spacing: 1.5px; opacity: 0.75; }
 
-/* ---- 手机模型 ---- */
 .phone-mock {
-  width: clamp(130px, 15vw, 190px);
-  aspect-ratio: 9/19;
-  border: 2px solid var(--ink);
-  border-radius: 24px;
-  background: var(--paper);
-  display: flex; flex-direction: column;
-  overflow: hidden;
-  flex-shrink: 0;
+  width: clamp(130px, 15vw, 190px); aspect-ratio: 9/19;
+  border: 2px solid var(--ink); border-radius: 24px;
+  background: var(--paper); display: flex; flex-direction: column;
+  overflow: hidden; flex-shrink: 0;
 }
-.phone-mock .status {
-  display: flex; justify-content: space-between;
-  padding: 6px 14px 2px;
-  font-family: var(--font-mono);
-  font-size: clamp(5px, 0.5vw, 7px);
-  color: var(--ink);
-}
+.phone-mock .status { display: flex; justify-content: space-between; padding: 6px 14px 2px; font-family: var(--font-mono); font-size: clamp(5px, 0.5vw, 7px); color: var(--ink); }
 .phone-mock .p-bar { height: 1px; background: var(--rule); margin: 3px 10px; }
-.phone-mock .p-inner {
-  flex: 1; display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 10px;
-}
+.phone-mock .p-inner { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px; }
 
-.p-ring {
-  width: clamp(60px, 6vw, 85px);
-  height: clamp(60px, 6vw, 85px);
-  border-radius: 50%;
-  border: 3px solid var(--rule);
-  position: relative;
-  display: flex; align-items: center; justify-content: center;
-  flex-direction: column;
-}
-.p-ring .fill {
-  position: absolute; inset: -3px; border-radius: 50%;
-  border: 3px solid transparent;
-  border-top-color: var(--ink); border-right-color: var(--ink);
-  transform: rotate(-45deg);
-}
-.p-ring .val {
-  font-family: var(--font-en);
-  font-size: clamp(16px, 1.8vw, 26px);
-  font-weight: 600; color: var(--ink);
-}
-.p-ring .lab {
-  font-family: var(--font-mono);
-  font-size: clamp(5px, 0.5vw, 7px);
-  color: var(--ink-3); margin-top: 2px;
-}
-
-.p-cal {
-  display: grid; grid-template-columns: repeat(7,1fr);
-  gap: 2px; width: 100%;
-}
-.p-cal span {
-  font-size: clamp(5px, 0.45vw, 7px);
-  text-align: center; padding: 2px 0;
-  color: var(--ink-3); font-family: var(--font-mono);
-}
+.p-ring { width: clamp(60px, 6vw, 85px); height: clamp(60px, 6vw, 85px); border-radius: 50%; border: 3px solid var(--rule); position: relative; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+.p-ring .fill { position: absolute; inset: -3px; border-radius: 50%; border: 3px solid transparent; border-top-color: var(--ink); border-right-color: var(--ink); transform: rotate(-45deg); }
+.p-ring .val { font-family: var(--font-en); font-size: clamp(16px, 1.8vw, 26px); font-weight: 600; color: var(--ink); }
+.p-ring .lab { font-family: var(--font-mono); font-size: clamp(5px, 0.5vw, 7px); color: var(--ink-3); margin-top: 2px; }
+.p-cal { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; width: 100%; }
+.p-cal span { font-size: clamp(5px, 0.45vw, 7px); text-align: center; padding: 2px 0; color: var(--ink-3); font-family: var(--font-mono); }
 .p-cal span.dark { background: var(--ink); color: var(--paper); }
-
 .p-timeline { width: 100%; font-size: clamp(5px, 0.45vw, 7px); }
-.p-timeline .row {
-  display: flex; justify-content: space-between;
-  padding: 2.5px 0; border-bottom: 0.5px solid var(--rule-2);
-  color: var(--ink-2); font-family: var(--font-mono);
-}
-
-.p-chart {
-  display: flex; align-items: flex-end; gap: 3px;
-  height: clamp(30px, 3.5vw, 50px); width: 100%;
-}
+.p-timeline .row { display: flex; justify-content: space-between; padding: 2.5px 0; border-bottom: 0.5px solid var(--rule-2); color: var(--ink-2); font-family: var(--font-mono); }
+.p-chart { display: flex; align-items: flex-end; gap: 3px; height: clamp(30px, 3.5vw, 50px); width: 100%; }
 .p-chart .b { flex: 1; background: var(--rule); }
 .p-chart .b.hi { background: var(--ink); }
 
-/* ---- 下载页 ---- */
+/* ---- 下载按钮 ---- */
 .download-section {
-  display: flex; gap: clamp(40px, 6vw, 80px);
-  align-items: center; justify-content: center;
+  display: flex; gap: clamp(32px, 5vw, 64px);
+  align-items: stretch; justify-content: center;
   margin-top: clamp(20px, 3vw, 36px);
 }
 .dl-card {
-  text-align: center;
+  text-align: center; width: 100%; max-width: 280px;
   display: flex; flex-direction: column;
-  align-items: center; gap: 10px;
-}
-.dl-card .qr {
-  width: clamp(140px, 16vw, 200px);
-  height: clamp(140px, 16vw, 200px);
+  align-items: center; justify-content: center;
+  gap: clamp(10px, 1.2vw, 16px);
   border: 2px solid var(--ink);
-  background: var(--paper);
-  display: flex; align-items: center;
-  justify-content: center;
-}
-.dl-card .qr img {
-  width: 88%; height: 88%;
+  padding: clamp(24px, 3vw, 40px) clamp(20px, 2.5vw, 32px);
 }
 .dl-card .platform {
-  font-family: var(--font-en);
-  font-size: clamp(16px, 2vw, 24px);
-  font-weight: 700;
-  color: var(--ink);
+  font-family: var(--font-en); font-size: clamp(18px, 2.2vw, 28px);
+  font-weight: 700; color: var(--ink); letter-spacing: 1px;
 }
-.dl-card .url {
-  font-family: var(--font-mono);
-  font-size: clamp(9px, 0.9vw, 12px);
-  color: var(--ink-3);
-  letter-spacing: 1px;
+.dl-card .ver-info {
+  font-family: var(--font-mono); font-size: clamp(9px, 0.9vw, 11px);
+  color: var(--ink-3); letter-spacing: 2px; min-height: 1.2em;
 }
+.dl-btn {
+  display: inline-block; width: 100%;
+  padding: clamp(14px, 1.6vw, 20px) clamp(20px, 2vw, 28px);
+  background: var(--ink); color: var(--paper);
+  border: none; font-family: var(--font-zh);
+  font-size: clamp(14px, 1.5vw, 18px); font-weight: 700;
+  letter-spacing: 3px; cursor: pointer; text-decoration: none;
+  transition: opacity 0.2s;
+}
+.dl-btn:hover, .dl-btn:active { opacity: 0.85; }
+.dl-btn.loading { opacity: 0.6; pointer-events: none; letter-spacing: 1px; }
 
-/* ---- 进度条 & 页码 ---- */
-.progress-bar {
-  position: absolute; bottom: 0; left: 0;
-  height: 3px; background: var(--ink);
-  z-index: 10;
-}
-.page-indicator {
-  position: absolute; bottom: 16px; right: 28px;
-  font-family: var(--font-mono);
-  font-size: clamp(9px, 0.9vw, 11px);
-  color: var(--ink-4); letter-spacing: 2px; z-index: 10;
-}
-.hint {
-  position: absolute; bottom: 16px; left: 50%;
-  transform: translateX(-50%);
-  font-family: var(--font-mono);
-  font-size: clamp(8px, 0.8vw, 10px);
-  color: var(--ink-4); letter-spacing: 1.5px; z-index: 10;
-  animation: pulse 2s infinite;
-}
-@keyframes pulse {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 1; }
-}
+.progress-bar { position: absolute; bottom: 0; left: 0; height: 3px; background: var(--ink); z-index: 10; }
+.page-indicator { position: absolute; bottom: 16px; right: 28px; font-family: var(--font-mono); font-size: clamp(9px, 0.9vw, 11px); color: var(--ink-4); letter-spacing: 2px; z-index: 10; }
+.hint { position: absolute; bottom: 16px; left: 50%; transform: translateX(-50%); font-family: var(--font-mono); font-size: clamp(8px, 0.8vw, 10px); color: var(--ink-4); letter-spacing: 1.5px; z-index: 10; animation: pulse 2s infinite; }
+@keyframes pulse { 0%, 100% { opacity: 0.35; } 50% { opacity: 1; } }
 
-/* =========================================================
-   移动端自适应 (≤768px)
-   ========================================================= */
+/* ---- 移动端 (≤768px) ---- */
 @media (max-width: 768px) {
-  .canvas {
-    width: 100vw; width: 100dvw;
-    height: 100vh; height: 100dvh;
-    box-shadow: none;
-  }
-  .slide {
-    padding: 10% 6% 14% 6%; /* 底部留空给进度条 */
-  }
-  .slide.split {
-    flex-direction: column;
-    gap: 10px;
-  }
+  .canvas { width: 100vw; width: 100dvw; height: 100vh; height: 100dvh; box-shadow: none; }
+  .slide { padding: 10% 6% 14% 6%; }
+  .slide.split { flex-direction: column; gap: 10px; }
   .slide.split > div:first-child { flex: 0 0 auto; justify-content: flex-start; }
   .slide.split > div:last-child { flex: 0 0 auto; }
-
-  .phone-mock {
-    width: clamp(90px, 28vw, 140px);
-  }
-
-  .highlights {
-    gap: 8px;
-    margin-top: 14px;
-  }
-  .hl-item {
-    min-width: 0;
-    padding: 10px 14px;
-    flex: 1 1 42%;
-    max-width: 48%;
-  }
+  .phone-mock { width: clamp(90px, 28vw, 140px); }
+  .highlights { gap: 8px; margin-top: 14px; }
+  .hl-item { min-width: 0; padding: 10px 14px; flex: 1 1 42%; max-width: 48%; }
   .hl-item .n { font-size: clamp(22px, 5.5vw, 32px); }
   .hl-item .t { font-size: clamp(9px, 1.8vw, 11px); }
-
-  .hl-box {
-    padding: clamp(14px, 3vw, 24px) clamp(20px, 5vw, 32px);
-  }
+  .hl-box { padding: clamp(14px, 3vw, 24px) clamp(20px, 5vw, 32px); }
   .hl-box .num { font-size: clamp(36px, 10vw, 60px); }
   .hl-box .label { font-size: clamp(11px, 2.2vw, 14px); }
-
   .s-num { font-size: clamp(9px, 1.6vw, 11px); }
   .s-title { font-size: clamp(22px, 5vw, 30px); line-height: 1.15; }
-
-  .download-section {
-    gap: 14px;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .dl-card .qr {
-    width: clamp(90px, 24vw, 130px);
-    height: clamp(90px, 24vw, 130px);
-  }
-  .dl-card .platform { font-size: clamp(12px, 2.2vw, 14px); }
-  .dl-card .url { font-size: clamp(7px, 1.6vw, 9px); }
-
-  .page-indicator {
-    bottom: 12px; right: 12px;
-    font-size: 9px; letter-spacing: 1px;
-  }
-  .hint {
-    bottom: 12px;
-    font-size: 8px;
-  }
-  .tag {
-    font-size: clamp(8px, 1.6vw, 10px);
-    letter-spacing: 2px;
-  }
+  .download-section { flex-direction: column; align-items: center; gap: 14px; }
+  .dl-card { max-width: 260px; padding: 20px 16px; }
+  .dl-card .platform { font-size: clamp(14px, 2.5vw, 18px); }
+  .page-indicator { bottom: 12px; right: 12px; font-size: 9px; letter-spacing: 1px; }
+  .hint { bottom: 12px; font-size: 8px; }
+  .tag { font-size: clamp(8px, 1.6vw, 10px); letter-spacing: 2px; }
 }
-
-/* 小屏手机 (≤400px) */
 @media (max-width: 400px) {
   .slide { padding: 10% 5% 16% 5%; }
   .hl-item .t { font-size: 8px; }
@@ -401,109 +201,71 @@ html, body {
   .s-title { font-size: clamp(18px, 5vw, 24px); }
   .hl-box .num { font-size: clamp(30px, 9vw, 48px); }
   .hl-item .n { font-size: clamp(18px, 5vw, 28px); }
-  .dl-card .qr { width: clamp(70px, 20vw, 100px); height: clamp(70px, 20vw, 100px); }
 }
 </style>
 </head>
 <body>
+<div class="stage"><div class="canvas" id="canvas"><div class="slides">
 
-<div class="stage">
-<div class="canvas" id="canvas">
-
-<div class="slides">
-
-  <!-- ====== 00 封面 ====== -->
+  <!-- 00 封面 -->
   <div class="slide active">
     <div class="tag">ANDROID · MINIMAL · OPEN SOURCE</div>
-    <div style="font-family:var(--font-en);font-size:clamp(44px,7vw,100px);font-weight:600;color:var(--ink);line-height:0.92;text-align:center;">
-      喝水提醒
-    </div>
-    <div style="font-size:clamp(13px,1.5vw,20px);color:var(--ink-3);margin-top:12px;letter-spacing:3px;text-align:center;">
-      极简 · 克制 · 专注于喝水这件小事
-    </div>
+    <div style="font-family:var(--font-en);font-size:clamp(44px,7vw,100px);font-weight:600;color:var(--ink);line-height:0.92;text-align:center;">喝水提醒</div>
+    <div style="font-size:clamp(13px,1.5vw,20px);color:var(--ink-3);margin-top:12px;letter-spacing:3px;text-align:center;">极简 · 克制 · 专注于喝水这件小事</div>
     <div style="width:60px;height:2px;background:var(--ink);margin:24px auto 0;"></div>
   </div>
 
-  <!-- ====== 01 核心数字 ====== -->
+  <!-- 01 四种人群 -->
   <div class="slide">
-    <div class="hl-box">
-      <div class="num">4</div>
-      <div class="label">种人群模式</div>
-    </div>
+    <div class="hl-box"><div class="num">4</div><div class="label">种人群模式</div></div>
     <div class="highlights">
       <div class="hl-item"><div class="n">成人</div><div class="t">2500 ml</div></div>
       <div class="hl-item"><div class="n">运动</div><div class="t">3000 ml</div></div>
       <div class="hl-item"><div class="n">孕妇</div><div class="t">2800 ml</div></div>
       <div class="hl-item"><div class="n">儿童</div><div class="t">1500 ml</div></div>
     </div>
-    <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-3);margin-top:18px;text-align:center;">
-      一键切换 · 智能适配推荐饮水量
-    </div>
+    <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-3);margin-top:18px;text-align:center;">一键切换 · 智能适配推荐饮水量</div>
   </div>
 
-  <!-- ====== 02 极简设计 ====== -->
+  <!-- 02 极简设计 -->
   <div class="slide split">
     <div>
       <div class="s-num">01 / 设计</div>
       <div class="s-title">黑白极简<br>报纸美学</div>
-      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">
-        仅用黑白灰三色构建。<br>
-        无彩色图标、无多余装饰。<br>
-        以排版留白构建层次。
-      </div>
+      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">仅用黑白灰三色构建。<br>无彩色图标、无多余装饰。<br>以排版留白构建层次。</div>
     </div>
-    <div>
-      <div class="hl-box">
-        <div class="num">96<span style="font-size:0.35em;font-weight:400;">%</span></div>
-        <div class="label">黑白灰</div>
-      </div>
-    </div>
+    <div><div class="hl-box"><div class="num">96<span style="font-size:0.35em;font-weight:400;">%</span></div><div class="label">黑白灰</div></div></div>
   </div>
 
-  <!-- ====== 03 长按速记 ====== -->
+  <!-- 03 长按速记 -->
   <div class="slide split">
     <div>
       <div class="phone-mock">
         <div class="status"><span>9:41</span><span>●●●●○ ▷</span></div>
         <div class="p-bar"></div>
         <div class="p-inner">
-          <div class="p-ring">
-            <div class="fill" style="transform:rotate(30deg);"></div>
-            <div class="val">+<span style="font-size:0.5em;">300ml</span></div>
-            <div class="lab">LONG PRESS</div>
-          </div>
-          <div style="font-size:clamp(5px,0.5vw,7px);color:var(--ink-2);margin-top:6px;text-align:center;">
-            长按进度环 → 快速记录
-          </div>
+          <div class="p-ring"><div class="fill" style="transform:rotate(30deg);"></div><div class="val">+<span style="font-size:0.5em;">300ml</span></div><div class="lab">LONG PRESS</div></div>
+          <div style="font-size:clamp(5px,0.5vw,7px);color:var(--ink-2);margin-top:6px;text-align:center;">长按进度环 → 快速记录</div>
         </div>
       </div>
     </div>
     <div>
       <div class="s-num">02 / 交互</div>
       <div class="s-title">长按进度环<br>快速记录</div>
-      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">
-        首页进度环支持长按手势。<br>
-        一键记录默认饮水量，<br>
-        无需繁琐操作。
-      </div>
+      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">首页进度环长按手势。<br>一键记录饮水量，无需繁琐操作。</div>
     </div>
   </div>
 
-  <!-- ====== 04 时间线 ====== -->
+  <!-- 04 时间线 -->
   <div class="slide split">
     <div>
       <div class="s-num">03 / 记录</div>
       <div class="s-title">今日喝水<br>时间线</div>
-      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">
-        每次记录以时间轴呈现，<br>
-        清晰追踪全天饮水节奏。<br>
-        支持编辑与删除。
-      </div>
+      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">每次记录以时间轴呈现。<br>清晰追踪全天节奏。支持编辑与删除。</div>
     </div>
     <div>
       <div class="phone-mock">
-        <div class="status"><span>9:41</span><span>●●●●○ ▷</span></div>
-        <div class="p-bar"></div>
+        <div class="status"><span>9:41</span><span>●●●●○ ▷</span></div><div class="p-bar"></div>
         <div class="p-inner">
           <div style="font-size:clamp(6px,0.6vw,8px);font-weight:700;align-self:flex-start;margin-bottom:6px;">今日记录</div>
           <div class="p-timeline">
@@ -519,12 +281,11 @@ html, body {
     </div>
   </div>
 
-  <!-- ====== 05 日历 ====== -->
+  <!-- 05 日历 -->
   <div class="slide split">
     <div>
       <div class="phone-mock">
-        <div class="status"><span>9:41</span><span>●●●●○ ▷</span></div>
-        <div class="p-bar"></div>
+        <div class="status"><span>9:41</span><span>●●●●○ ▷</span></div><div class="p-bar"></div>
         <div class="p-inner">
           <div style="font-size:clamp(6px,0.6vw,8px);font-weight:700;align-self:flex-start;margin-bottom:4px;">2024.07</div>
           <div style="display:flex;gap:4px;align-self:flex-start;margin-bottom:6px;font-family:var(--font-mono);font-size:clamp(5px,0.45vw,7px);color:var(--ink-3);">
@@ -544,36 +305,26 @@ html, body {
     <div>
       <div class="s-num">04 / 回顾</div>
       <div class="s-title">按月日历<br>达标可视化</div>
-      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">
-        达标日以黑色填充标注。<br>
-        月度喝水习惯，一目了然。
-      </div>
+      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">达标日黑色填充标注。<br>月度习惯一目了然。</div>
     </div>
   </div>
 
-  <!-- ====== 06 趋势图 ====== -->
+  <!-- 06 趋势 -->
   <div class="slide split">
     <div>
       <div class="s-num">05 / 统计</div>
       <div class="s-title">每周趋势<br>柱状分析</div>
-      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">
-        按周查看饮水量变化。<br>
-        数据驱动，养成好习惯。
-      </div>
+      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">按周查看变化。<br>数据驱动好习惯。</div>
     </div>
     <div>
       <div class="phone-mock">
-        <div class="status"><span>9:41</span><span>●●●●○ ▷</span></div>
-        <div class="p-bar"></div>
+        <div class="status"><span>9:41</span><span>●●●●○ ▷</span></div><div class="p-bar"></div>
         <div class="p-inner">
           <div style="font-size:clamp(6px,0.6vw,8px);font-weight:700;align-self:flex-start;margin-bottom:6px;">本周趋势</div>
           <div class="p-chart">
-            <div class="b" style="height:60%"></div>
-            <div class="b hi" style="height:85%"></div>
-            <div class="b" style="height:45%"></div>
-            <div class="b hi" style="height:90%"></div>
-            <div class="b hi" style="height:80%"></div>
-            <div class="b" style="height:55%"></div>
+            <div class="b" style="height:60%"></div><div class="b hi" style="height:85%"></div>
+            <div class="b" style="height:45%"></div><div class="b hi" style="height:90%"></div>
+            <div class="b hi" style="height:80%"></div><div class="b" style="height:55%"></div>
             <div class="b" style="height:40%"></div>
           </div>
           <div style="display:flex;justify-content:space-between;width:100%;font-family:var(--font-mono);font-size:clamp(5px,0.45vw,7px);color:var(--ink-3);margin-top:3px;">
@@ -584,42 +335,31 @@ html, body {
     </div>
   </div>
 
-  <!-- ====== 07 全屏提醒 ====== -->
+  <!-- 07 全屏提醒 -->
   <div class="slide split">
     <div>
       <div class="phone-mock">
-        <div class="status"><span>9:41</span><span>●●●●○ ▷</span></div>
-        <div class="p-bar"></div>
+        <div class="status"><span>9:41</span><span>●●●●○ ▷</span></div><div class="p-bar"></div>
         <div class="p-inner" style="background:var(--paper);justify-content:center;">
           <div style="font-size:clamp(16px,1.8vw,26px);font-weight:600;color:var(--ink);">喝水时间</div>
           <div style="font-size:clamp(9px,0.9vw,13px);color:var(--ink-2);margin-top:2px;">250 ml</div>
-          <div style="font-size:clamp(7px,0.7vw,10px);color:var(--ink-2);text-align:center;margin-top:8px;line-height:1.5;">
-            水是生命之源<br>别忘了补充水分
-          </div>
+          <div style="font-size:clamp(7px,0.7vw,10px);color:var(--ink-2);text-align:center;margin-top:8px;line-height:1.5;">水是生命之源<br>别忘了补充水分</div>
         </div>
       </div>
     </div>
     <div>
       <div class="s-num">06 / 提醒</div>
       <div class="s-title">全屏弹窗<br>+ 通知栏</div>
-      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">
-        双重提醒，不会错过。<br>
-        全屏弹窗可独立开关，<br>
-        关闭后保留通知栏提醒。
-      </div>
+      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">双重提醒。<br>全屏弹窗可独立开关，<br>关闭后保留通知栏提醒。</div>
     </div>
   </div>
 
-  <!-- ====== 08 桌面小部件 ====== -->
+  <!-- 08 桌面小部件 -->
   <div class="slide split">
     <div>
       <div class="s-num">07 / 桌面</div>
       <div class="s-title">桌面小部件<br>无需开 App</div>
-      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">
-        大小两种尺寸可选。<br>
-        桌面查看进度，<br>
-        延续黑白极简风。
-      </div>
+      <div style="font-size:clamp(11px,1.2vw,16px);color:var(--ink-2);line-height:1.7;">大小两种可选。<br>桌面看进度，<br>延续黑白极简风。</div>
     </div>
     <div style="display:flex;flex-direction:column;gap:14px;">
       <div style="width:clamp(170px,18vw,240px);background:var(--paper);border:2px solid var(--ink);padding:14px;">
@@ -628,23 +368,18 @@ html, body {
           <span style="font-family:var(--font-en);font-size:clamp(22px,2.5vw,36px);font-weight:600;color:var(--ink);">1,550</span>
           <span style="font-size:clamp(9px,0.9vw,12px);color:var(--ink-3);">/ 2,500 ml</span>
         </div>
-        <div style="height:4px;background:var(--rule-2);margin-top:8px;">
-          <div style="width:62%;height:100%;background:var(--ink);"></div>
-        </div>
+        <div style="height:4px;background:var(--rule-2);margin-top:8px;"><div style="width:62%;height:100%;background:var(--ink);"></div></div>
       </div>
       <div style="width:clamp(90px,10vw,140px);background:var(--paper);border:2px solid var(--ink);padding:10px;display:flex;align-items:center;gap:8px;">
         <div style="width:clamp(30px,3vw,40px);height:clamp(30px,3vw,40px);border-radius:50%;border:2px solid var(--rule);display:flex;align-items:center;justify-content:center;">
           <span style="font-family:var(--font-en);font-size:clamp(9px,1vw,13px);font-weight:600;color:var(--ink);">62%</span>
         </div>
-        <div>
-          <div style="font-size:clamp(8px,0.8vw,10px);font-weight:700;color:var(--ink);">1550</div>
-          <div style="font-size:clamp(6px,0.6vw,8px);color:var(--ink-3);">/ 2500</div>
-        </div>
+        <div><div style="font-size:clamp(8px,0.8vw,10px);font-weight:700;color:var(--ink);">1550</div><div style="font-size:clamp(6px,0.6vw,8px);color:var(--ink-3);">/ 2500</div></div>
       </div>
     </div>
   </div>
 
-  <!-- ====== 09 智能引擎 ====== -->
+  <!-- 09 智能引擎 -->
   <div class="slide">
     <div class="s-num">08 / 引擎</div>
     <div class="s-title" style="text-align:center;">智能提醒引擎</div>
@@ -653,56 +388,35 @@ html, body {
       <div class="hl-item"><div class="n">∞</div><div class="t">自定义间隔</div></div>
       <div class="hl-item"><div class="n">2x</div><div class="t">双重提醒</div></div>
     </div>
-    <div style="font-size:clamp(10px,1.1vw,14px);color:var(--ink-3);margin-top:20px;text-align:center;line-height:1.6;">
-      Android 12+ 精准闹钟 · 开机自启恢复 · 电池优化引导<br>
-      华为 / 小米 / OPPO / vivo / 三星
-    </div>
+    <div style="font-size:clamp(10px,1.1vw,14px);color:var(--ink-3);margin-top:20px;text-align:center;line-height:1.6;">Android 12+ 精准闹钟 · 开机自启恢复 · 电池优化引导<br>华为 / 小米 / OPPO / vivo / 三星</div>
   </div>
 
-  <!-- ====== 10 双端下载（含二维码）===== -->
+  <!-- 10 双端下载（点击立即下载） -->
   <div class="slide">
-    <div class="tag">扫码下载  ·  免费开源</div>
+    <div class="tag">免费下载  ·  开源无广告</div>
     <div class="s-title" style="text-align:center;">双平台下载</div>
     <div class="download-section">
-      <!-- GitHub -->
       <div class="dl-card">
-        <div class="qr">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://github.com/52uni/heleme/releases"
-               alt="扫码下载 GitHub 最新版" loading="lazy" style="image-rendering:pixelated;"
-               onerror="this.innerHTML='<span style=font-size:28px;font-weight:700>GitHub</span>'">
-        </div>
         <div class="platform">GitHub</div>
-        <div class="url">github.com/52uni/heleme</div>
+        <div class="ver-info" id="gh-version">获取中…</div>
+        <a class="dl-btn loading" id="gh-btn" href="https://github.com/52uni/heleme/releases/latest" target="_blank" rel="noopener">下载最新版</a>
       </div>
-      <!-- Gitee -->
       <div class="dl-card">
-        <div class="qr">
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=https://gitee.com/gui_1124/heleme/releases"
-               alt="扫码下载 Gitee 最新版" loading="lazy" style="image-rendering:pixelated;"
-               onerror="this.innerHTML='<span style=font-size:28px;font-weight:700>Gitee</span>'">
-        </div>
         <div class="platform">Gitee</div>
-        <div class="url">gitee.com/gui_1124/heleme</div>
+        <div class="ver-info" id="ge-version">获取中…</div>
+        <a class="dl-btn loading" id="ge-btn" href="https://gitee.com/gui_1124/heleme/releases/latest" target="_blank" rel="noopener">下载最新版</a>
       </div>
     </div>
-    <div style="font-size:clamp(9px,1vw,13px);color:var(--ink-3);margin-top:16px;text-align:center;">
-      国内用户扫 Gitee &nbsp;·&nbsp; 海外用户扫 GitHub
-    </div>
+    <div style="font-size:clamp(9px,1vw,13px);color:var(--ink-3);margin-top:16px;text-align:center;">国内用户下载 Gitee 更快 &nbsp;·&nbsp; 海外用户下载 GitHub 直达</div>
   </div>
 
-  <!-- ====== 11 结束 ====== -->
+  <!-- 11 结束 -->
   <div class="slide">
     <div class="tag">THANK YOU</div>
-    <div style="font-family:var(--font-en);font-size:clamp(36px,5vw,72px);font-weight:600;color:var(--ink);line-height:0.92;text-align:center;">
-      喝水提醒
-    </div>
-    <div style="font-size:clamp(13px,1.5vw,20px);color:var(--ink-3);margin-top:12px;letter-spacing:3px;text-align:center;">
-      立即下载，开启健康饮水之旅
-    </div>
+    <div style="font-family:var(--font-en);font-size:clamp(36px,5vw,72px);font-weight:600;color:var(--ink);line-height:0.92;text-align:center;">喝水提醒</div>
+    <div style="font-size:clamp(13px,1.5vw,20px);color:var(--ink-3);margin-top:12px;letter-spacing:3px;text-align:center;">立即下载，开启健康饮水之旅</div>
     <div style="width:60px;height:2px;background:var(--ink);margin:24px auto 0;"></div>
-    <div style="font-family:var(--font-mono);font-size:clamp(8px,0.9vw,12px);color:var(--ink-4);margin-top:14px;letter-spacing:2px;">
-      GitHub · 52uni/heleme  &nbsp;|&nbsp;  Gitee · gui_1124/heleme
-    </div>
+    <div style="font-family:var(--font-mono);font-size:clamp(8px,0.9vw,12px);color:var(--ink-4);margin-top:14px;letter-spacing:2px;">GitHub · 52uni/heleme  &nbsp;|&nbsp;  Gitee · gui_1124/heleme</div>
   </div>
 
 </div>
@@ -711,18 +425,17 @@ html, body {
 <div class="page-indicator" id="pageIndicator">01 / 12</div>
 <div class="hint" id="hint">点击翻页  ·  空格暂停</div>
 
-</div>
-</div>
+</div></div>
 
 <script>
 (function() {
-  const slides = document.querySelectorAll('.slide');
-  const total = slides.length;
-  const DURATION = 5000;
-  let idx = 0, timer = null, paused = false;
-  const bar = document.getElementById('progressBar');
-  const pi = document.getElementById('pageIndicator');
-  const hint = document.getElementById('hint');
+  var slides = document.querySelectorAll('.slide');
+  var total = slides.length;
+  var DURATION = 5000;
+  var idx = 0, timer = null, paused = false;
+  var bar = document.getElementById('progressBar');
+  var pi = document.getElementById('pageIndicator');
+  var hint = document.getElementById('hint');
 
   function goTo(i) {
     if (i === idx) return;
@@ -751,39 +464,124 @@ html, body {
     paused ? stop() : play();
   }
 
-  // ---- 鼠标 / 触摸 点击 ----
   document.getElementById('canvas').addEventListener('click', function(e) {
-    if (e.target === e.currentTarget || e.target.closest('.slides')) {
-      stop(); nx(); play();
-    }
+    if (e.target === e.currentTarget || e.target.closest('.slides')) { stop(); nx(); play(); }
   });
 
-  // ---- 触摸滑动 ----
   var touchStartX = 0, touchStartY = 0;
   document.getElementById('canvas').addEventListener('touchstart', function(e) {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
+    touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
   }, { passive: true });
-
   document.getElementById('canvas').addEventListener('touchend', function(e) {
     var dx = e.changedTouches[0].clientX - touchStartX;
     var dy = e.changedTouches[0].clientY - touchStartY;
-    // 水平滑动超过 40px 且大于垂直滑动
     if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
-      e.preventDefault();
-      stop();
-      dx > 0 ? pv() : nx();
-      play();
+      e.preventDefault(); stop(); dx > 0 ? pv() : nx(); play();
     }
   });
 
-  // ---- 键盘 ----
   document.addEventListener('keydown', function(e) {
     if (e.code === 'Space') { e.preventDefault(); toggle(); }
     if (e.code === 'ArrowRight' || e.code === 'ArrowDown') { e.preventDefault(); stop(); nx(); play(); }
     if (e.code === 'ArrowLeft' || e.code === 'ArrowUp') { e.preventDefault(); stop(); pv(); play(); }
     if (e.code === 'KeyF') { e.preventDefault(); document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); }
   });
+
+  // ---------- 获取双端最新下载链接 ----------
+  function fetchRelease(url, btnId, verId, cb) {
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var el = document.getElementById(btnId);
+        var ver = document.getElementById(verId);
+        el.classList.remove('loading');
+        if (cb) { cb(data, el, ver); } else { defaultHandler(data, el, ver, url); }
+      })
+      .catch(function() {
+        var el = document.getElementById(btnId);
+        var ver = document.getElementById(verId);
+        el.classList.remove('loading');
+        el.textContent = '前往下载页';
+        ver.textContent = '点击跳转 Release 页面';
+      });
+  }
+
+  function defaultHandler(data, btn, ver, url) {
+    var apk = null;
+    if (data.assets && data.assets.length) {
+      for (var i = 0; i < data.assets.length; i++) {
+        if (data.assets[i].name && data.assets[i].name.endsWith('.apk')) {
+          apk = data.assets[i]; break;
+        }
+      }
+    }
+    if (apk) {
+      btn.href = apk.browser_download_url;
+      btn.textContent = '立即下载';
+      var tag = data.tag_name || '';
+      var size = apk.size ? (apk.size / 1048576).toFixed(1) + ' MB' : '';
+      ver.textContent = (tag ? 'v' + tag.replace('v','') : '') + (size ? '  ' + size : '');
+    } else {
+      btn.href = data.html_url || url;
+      btn.textContent = '前往下载';
+      ver.textContent = data.tag_name ? 'v' + data.tag_name.replace('v','') : '';
+    }
+  }
+
+  // GitHub
+  fetchRelease(
+    'https://api.github.com/repos/52uni/heleme/releases/latest',
+    'gh-btn', 'gh-version',
+    function(data, btn, ver) {
+      // GitHub assets
+      var apk = null;
+      if (data.assets && data.assets.length) {
+        for (var i = 0; i < data.assets.length; i++) {
+          if (data.assets[i].name && data.assets[i].name.endsWith('.apk')) {
+            apk = data.assets[i]; break;
+          }
+        }
+      }
+      if (apk) {
+        btn.href = apk.browser_download_url;
+        btn.textContent = '立即下载';
+        var tag = data.tag_name || '';
+        var sizeMB = apk.size ? (apk.size / 1048576).toFixed(1) + ' MB' : '';
+        ver.textContent = (tag ? tag : '') + (sizeMB ? '  ' + sizeMB : '');
+      } else {
+        btn.href = data.html_url;
+        btn.textContent = '前往下载';
+        ver.textContent = data.tag_name || '';
+      }
+    }
+  );
+
+  // Gitee
+  fetchRelease(
+    'https://gitee.com/api/v5/repos/gui_1124/heleme/releases/latest',
+    'ge-btn', 'ge-version',
+    function(data, btn, ver) {
+      // Gitee attach_files
+      var apk = null;
+      if (data.assets && data.assets.length) {
+        for (var i = 0; i < data.assets.length; i++) {
+          if (data.assets[i].name && data.assets[i].name.endsWith('.apk')) {
+            apk = data.assets[i]; break;
+          }
+        }
+      }
+      if (apk) {
+        btn.href = apk.browser_download_url;
+        btn.textContent = '立即下载';
+        var tag = data.tag_name || '';
+        ver.textContent = tag;
+      } else {
+        btn.href = data.html_url || 'https://gitee.com/gui_1124/heleme/releases/latest';
+        btn.textContent = '前往下载';
+        ver.textContent = data.tag_name || '';
+      }
+    }
+  );
 
   play();
 })();
