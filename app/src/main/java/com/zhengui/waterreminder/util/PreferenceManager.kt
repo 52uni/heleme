@@ -9,6 +9,7 @@ object PreferenceManager {
     private const val KEY_CURRENT_TYPE_ID = "current_type_id"
     private const val KEY_AUTO_START_ENABLED = "auto_start_enabled"
     private const val KEY_HAS_TRIED_SWIPE_DELETE_REMINDER = "has_tried_swipe_delete_reminder"
+    private const val KEY_FULLSCREEN_REMINDER_ENABLED = "fullscreen_reminder_enabled"
 
     fun isReminderEnabled(context: Context): Boolean {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -48,5 +49,15 @@ object PreferenceManager {
     fun setHasTriedSwipeDeleteReminder(context: Context, tried: Boolean) {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putBoolean(KEY_HAS_TRIED_SWIPE_DELETE_REMINDER, tried).apply()
+    }
+
+    fun isFullscreenReminderEnabled(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_FULLSCREEN_REMINDER_ENABLED, true)
+    }
+
+    fun setFullscreenReminderEnabled(context: Context, enabled: Boolean) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_FULLSCREEN_REMINDER_ENABLED, enabled).apply()
     }
 }

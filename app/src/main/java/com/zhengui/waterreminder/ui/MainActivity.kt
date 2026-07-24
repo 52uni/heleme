@@ -94,7 +94,11 @@ class MainActivity : AppCompatActivity() {
         }
         binding.drawerContent.navPreview.setOnClickListener {
             closeDrawer()
-            startActivity(Intent(this@MainActivity, FullscreenReminderActivity::class.java))
+            if (PreferenceManager.isFullscreenReminderEnabled(this@MainActivity)) {
+                startActivity(Intent(this@MainActivity, FullscreenReminderActivity::class.java))
+            } else {
+                Toast.makeText(this@MainActivity, "全屏提醒已关闭，可在侧边栏开启", Toast.LENGTH_SHORT).show()
+            }
         }
 
         setupSwitches()
@@ -122,6 +126,15 @@ class MainActivity : AppCompatActivity() {
                     PreferenceManager.setAutoStartEnabled(this@MainActivity, false)
                     Toast.makeText(this@MainActivity, "已关闭自动启动", Toast.LENGTH_SHORT).show()
                 }
+            }
+        }
+
+        binding.drawerContent.drawerSwitchFullscreen.apply {
+            isChecked = PreferenceManager.isFullscreenReminderEnabled(this@MainActivity)
+            setOnCheckedChangeListener { _, isChecked ->
+                PreferenceManager.setFullscreenReminderEnabled(this@MainActivity, isChecked)
+                val msg = if (isChecked) "全屏提醒已开启" else "全屏提醒已关闭，仅保留通知栏提醒"
+                Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
             }
         }
     }

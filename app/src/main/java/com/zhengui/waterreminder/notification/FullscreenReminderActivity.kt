@@ -51,6 +51,11 @@ class FullscreenReminderActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (!PreferenceManager.isFullscreenReminderEnabled(this)) {
+            finish()
+            return
+        }
+
         turnOnScreen()
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {

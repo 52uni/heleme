@@ -201,6 +201,10 @@ class ReminderReceiver : BroadcastReceiver() {
      * 直接启动全屏提醒Activity，不依赖通知的fullScreenIntent（国产ROM常拦截）
      */
     private fun launchFullScreenReminder(context: Context, amount: Int, reminderType: String) {
+        if (!PreferenceManager.isFullscreenReminderEnabled(context)) {
+            Log.d(TAG, "全屏提醒已关闭，跳过启动全屏提醒Activity")
+            return
+        }
         try {
             val intent = Intent(context, FullscreenReminderActivity::class.java).apply {
                 putExtra(FullscreenReminderActivity.EXTRA_REMINDER_TYPE, reminderType)

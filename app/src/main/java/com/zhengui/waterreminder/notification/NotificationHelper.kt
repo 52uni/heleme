@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.zhengui.waterreminder.R
 import com.zhengui.waterreminder.ui.MainActivity
+import com.zhengui.waterreminder.util.PreferenceManager
 
 class NotificationHelper(private val context: Context) {
 
@@ -122,7 +123,7 @@ class NotificationHelper(private val context: Context) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        return NotificationCompat.Builder(context, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(text)
@@ -130,11 +131,15 @@ class NotificationHelper(private val context: Context) {
             .setDefaults(NotificationCompat.DEFAULT_SOUND or NotificationCompat.DEFAULT_VIBRATE)
             .setAutoCancel(true)
             .setContentIntent(contentPendingIntent)
-            .setFullScreenIntent(fullScreenPendingIntent, true)
             .setCategory(android.app.Notification.CATEGORY_ALARM)
             .addAction(R.drawable.ic_water_cup, "喝了200ml", drinkPending200)
             .addAction(R.drawable.ic_water_cup, "喝了300ml", drinkPending300)
-            .build()
+
+        if (PreferenceManager.isFullscreenReminderEnabled(context)) {
+            builder.setFullScreenIntent(fullScreenPendingIntent, true)
+        }
+
+        return builder.build()
     }
 
     fun showIntervalReminderNotification(suggestedAmountMl: Int) {
