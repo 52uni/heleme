@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:letterSpacing="0.15"
-        android:text="Vol. 02 · v2.0.1"
+        android:text="Vol. 02 · v2.0.3"
         android:textColor="#6B6B6B"
         android:textSize="12sp" />
 

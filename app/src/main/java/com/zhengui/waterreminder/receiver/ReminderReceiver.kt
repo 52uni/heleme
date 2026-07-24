@@ -35,7 +35,13 @@ class ReminderReceiver : BroadcastReceiver() {
         val now = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.getDefault()).format(Date())
         Log.d(TAG, "========== onReceive 触发 at $now ==========")
         Log.d(TAG, "Intent extras: suggested_amount=${intent.getIntExtra("suggested_amount", -1)}, is_interval=${intent.getBooleanExtra("is_interval_reminder", false)}, is_small_cycle=${intent.getBooleanExtra("is_small_cycle_reminder", false)}, reminder_time_id=${intent.getLongExtra("reminder_time_id", -1)}, hour=${intent.getIntExtra("reminder_hour", -1)}, minute=${intent.getIntExtra("reminder_minute", -1)}")
-        Log.d(TAG, "提醒总开关: ${PreferenceManager.isReminderEnabled(context)}")
+        val isReminderEnabled = PreferenceManager.isReminderEnabled(context)
+        Log.d(TAG, "提醒总开关: $isReminderEnabled")
+
+        if (!isReminderEnabled) {
+            Log.d(TAG, "提醒总开关已关闭，忽略本次提醒触发")
+            return
+        }
 
         val pendingResult = goAsync()
 

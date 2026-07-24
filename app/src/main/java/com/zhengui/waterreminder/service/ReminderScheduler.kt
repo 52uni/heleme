@@ -35,6 +35,9 @@ object ReminderScheduler {
     private const val KEY_LAST_INTERVAL_TRIGGER_TIME = "last_interval_trigger_time"
     const val SMALL_CYCLE_MINUTES = 5
 
+    private fun isReminderEnabled(context: Context): Boolean =
+        PreferenceManager.isReminderEnabled(context)
+
     /**
      * 调度间隔提醒（基于开始时间或打卡时间）
      * - 首次提醒：从类型的开始时间（如 9:00）算起
@@ -42,6 +45,10 @@ object ReminderScheduler {
      * - 打卡后调用时：从打卡时刻 + 间隔
      */
     fun scheduleNextReminder(context: Context) {
+        if (!isReminderEnabled(context)) {
+            Log.d(TAG, "提醒总开关已关闭，跳过调度间隔提醒")
+            return
+        }
         // 先取消旧的间隔闹钟，防止重复调度
         cancelReminder(context)
         scope.launch {
@@ -139,6 +146,10 @@ object ReminderScheduler {
      * 从打卡时刻 + 间隔分钟
      */
     fun scheduleAfterDrink(context: Context) {
+        if (!isReminderEnabled(context)) {
+            Log.d(TAG, "提醒总开关已关闭，跳过打卡后重新调度")
+            return
+        }
         val now = System.currentTimeMillis()
         setLastDrinkTime(context, now)
         cancelSmallCycle(context)
@@ -160,6 +171,10 @@ object ReminderScheduler {
      * 使用 setAlarmClock 确保最高优先级，防止被 OEM 系统丢弃
      */
     fun scheduleSmallCycle(context: Context, suggestedAmount: Int = 200) {
+        if (!isReminderEnabled(context)) {
+            Log.d(TAG, "提醒总开关已关闭，跳过调度小周期")
+            return
+        }
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, ReminderReceiver::class.java).apply {
             putExtra("is_small_cycle_reminder", true)
@@ -306,6 +321,10 @@ object ReminderScheduler {
     }
 
     fun scheduleAllReminders(context: Context) {
+        if (!isReminderEnabled(context)) {
+            Log.d(TAG, "提醒总开关已关闭，跳过调度固定时间提醒")
+            return
+        }
         scope.launch {
             try {
                 val db = (context.applicationContext as App).database
@@ -362,6 +381,10 @@ object ReminderScheduler {
      * 将单个固定时间点提醒重新调度到明天同一时间
      */
     fun scheduleFixedReminderToTomorrow(context: Context, reminderTimeId: Long, hour: Int, minute: Int) {
+        if (!isReminderEnabled(context)) {
+            Log.d(TAG, "提醒总开关已关闭，跳过调度明天固定提醒")
+            return
+        }
         scope.launch {
             try {
                 val db = (context.applicationContext as App).database
