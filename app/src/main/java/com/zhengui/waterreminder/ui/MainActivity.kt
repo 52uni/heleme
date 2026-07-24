@@ -72,7 +72,29 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private val dailyQuotes = arrayOf(
+        "每一天都是崭新的开始",
+        "水是生命之源，记得喝水哦",
+        "喝水的你，一定很美",
+        "保持水分，保持活力",
+        "一杯水，一份健康",
+        "你今天喝水了吗？",
+        "喝水是最简单的养生",
+        "点滴之间，润物无声",
+        "好好喝水，好好生活",
+        "水润万物，也润你",
+        "生活很忙，别忘了喝水",
+        "一杯温水，温暖一天",
+        "喝水打卡，健康加分",
+        "每一天，从一杯水开始",
+        "你是自己健康的第一责任人"
+    )
+
     private fun setupNavigationDrawer() {
+        // 每日随机一言
+        val quote = dailyQuotes[(System.currentTimeMillis() % dailyQuotes.size).toInt()]
+        binding.drawerContent.tvDailyQuote.text = quote
+
         binding.drawerContent.navHome.setOnClickListener {
             showHome()
             closeDrawer()

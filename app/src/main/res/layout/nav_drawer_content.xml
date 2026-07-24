@@ -16,13 +16,14 @@
         android:textStyle="bold" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:id="@+id/tvDailyQuote"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:letterSpacing="0.15"
-        android:text="Vol. 02 · v2.0.4"
-        android:textColor="#6B6B6B"
-        android:textSize="12sp" />
+        android:layout_marginTop="8dp"
+        android:lineSpacingExtra="4dp"
+        android:text="每一天都是崭新的开始"
+        android:textColor="#888888"
+        android:textSize="13sp" />
 
     <View
         android:layout_width="match_parent"
