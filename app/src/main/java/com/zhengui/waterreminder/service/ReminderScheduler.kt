@@ -15,6 +15,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import java.util.Calendar
 
 object ReminderScheduler {
@@ -26,6 +28,12 @@ object ReminderScheduler {
     }
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO + exceptionHandler)
+
+    /**
+     * 调度/取消操作共用同一把锁，避免多个协程同时读写 AlarmManager 和数据库时出现竞争
+     *（例如 startReminder 中 cancel 与 schedule 并发执行导致闹钟被误取消）
+     */
+    private val mutex = Mutex()
 
     private const val PREFS_NAME = "water_reminder_prefs"
     private const val KEY_LAST_DRINK_TIME = "last_drink_time"
@@ -52,6 +60,7 @@ object ReminderScheduler {
         // 先取消旧的间隔闹钟，防止重复调度
         cancelReminder(context)
         scope.launch {
+            mutex.withLock {
             try {
                 val db = (context.applicationContext as App).database
                 val typeId = PreferenceManager.getCurrentTypeId(context)
@@ -138,6 +147,7 @@ object ReminderScheduler {
             } catch (e: Exception) {
                 Log.e(TAG, "调度间隔提醒失败", e)
             }
+            }
         }
     }
 
@@ -175,6 +185,18 @@ object ReminderScheduler {
             Log.d(TAG, "提醒总开关已关闭，跳过调度小周期")
             return
         }
+        scope.launch {
+            mutex.withLock {
+                try {
+                    scheduleSmallCycleInternal(context, suggestedAmount)
+                } catch (e: Exception) {
+                    Log.e(TAG, "调度小周期失败", e)
+                }
+            }
+        }
+    }
+
+    private fun scheduleSmallCycleInternal(context: Context, suggestedAmount: Int) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, ReminderReceiver::class.java).apply {
             putExtra("is_small_cycle_reminder", true)
@@ -217,15 +239,20 @@ object ReminderScheduler {
      * 取消小周期闹钟
      */
     fun cancelSmallCycle(context: Context) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, ReminderReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            REQUEST_CODE_SMALL_CYCLE,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmManager.cancel(pendingIntent)
+        scope.launch {
+            mutex.withLock {
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val intent = Intent(context, ReminderReceiver::class.java)
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    REQUEST_CODE_SMALL_CYCLE,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                alarmManager.cancel(pendingIntent)
+                Log.d(TAG, "已取消小周期闹钟")
+            }
+        }
     }
 
     /**
@@ -237,10 +264,10 @@ object ReminderScheduler {
     }
 
     /**
-     * 精确调度闹钟，自动处理 Android 12+ 的精确闹钟权限问题
-     * - 有精确闹钟权限：使用 setExactAndAllowWhileIdle（精确且可唤醒）
-     * - 无精确闹钟权限：使用 setAlarmClock（始终精确，会在状态栏显示闹钟图标）
-     * - Android 12 以下：使用 setExactAndAllowWhileIdle，失败则回退到 set
+     * 精确调度闹钟。
+     * - Android 12+：统一使用 setAlarmClock。国产 ROM 对 setExactAndAllowWhileIdle
+     *   常有 1 小时级别的批量延迟，setAlarmClock 会显示闹钟图标但触发最可靠。
+     * - Android 12 以下：使用 setExactAndAllowWhileIdle，失败则回退到 set。
      */
     private fun scheduleExactAlarm(
         alarmManager: AlarmManager,
@@ -250,33 +277,22 @@ object ReminderScheduler {
     ) {
         val triggerDate = java.text.SimpleDateFormat("MM-dd HH:mm:ss", java.util.Locale.getDefault())
             .format(java.util.Date(triggerTime))
-        Log.d(TAG, "调度闹钟 → $triggerDate")
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (alarmManager.canScheduleExactAlarms()) {
-                Log.d(TAG, "使用 setExactAndAllowWhileIdle")
-                alarmManager.setExactAndAllowWhileIdle(
-                    AlarmManager.RTC_WAKEUP,
-                    triggerTime,
-                    pendingIntent
-                )
-            } else {
-                // 无精确闹钟权限，使用 setAlarmClock 确保准时触发
-                Log.d(TAG, "无精确闹钟权限，使用 setAlarmClock")
-                val showIntent = PendingIntent.getActivity(
-                    context,
-                    REQUEST_CODE_ALARM_CLOCK,
-                    Intent(context, MainActivity::class.java),
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                alarmManager.setAlarmClock(
-                    AlarmManager.AlarmClockInfo(triggerTime, showIntent),
-                    pendingIntent
-                )
-            }
+            Log.d(TAG, "调度闹钟(setAlarmClock) → $triggerDate")
+            val showIntent = PendingIntent.getActivity(
+                context,
+                REQUEST_CODE_ALARM_CLOCK,
+                Intent(context, MainActivity::class.java),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            alarmManager.setAlarmClock(
+                AlarmManager.AlarmClockInfo(triggerTime, showIntent),
+                pendingIntent
+            )
         } else {
+            Log.d(TAG, "调度闹钟(setExactAndAllowWhileIdle) → $triggerDate")
             try {
-                Log.d(TAG, "使用 setExactAndAllowWhileIdle (API < 31)")
                 alarmManager.setExactAndAllowWhileIdle(
                     AlarmManager.RTC_WAKEUP,
                     triggerTime,
@@ -309,15 +325,20 @@ object ReminderScheduler {
     }
 
     fun cancelReminder(context: Context) {
-        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        val intent = Intent(context, ReminderReceiver::class.java)
-        val pendingIntent = PendingIntent.getBroadcast(
-            context,
-            REQUEST_CODE_INTERVAL,
-            intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        alarmManager.cancel(pendingIntent)
+        scope.launch {
+            mutex.withLock {
+                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                val intent = Intent(context, ReminderReceiver::class.java)
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    REQUEST_CODE_INTERVAL,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+                alarmManager.cancel(pendingIntent)
+                Log.d(TAG, "已取消间隔提醒闹钟")
+            }
+        }
     }
 
     fun scheduleAllReminders(context: Context) {
@@ -326,6 +347,7 @@ object ReminderScheduler {
             return
         }
         scope.launch {
+            mutex.withLock {
             try {
                 val db = (context.applicationContext as App).database
                 val enabledTimes = db.reminderTimeDao().getEnabled()
@@ -374,6 +396,7 @@ object ReminderScheduler {
             } catch (e: Exception) {
                 Log.e(TAG, "调度固定时间提醒失败", e)
             }
+            }
         }
     }
 
@@ -386,6 +409,7 @@ object ReminderScheduler {
             return
         }
         scope.launch {
+            mutex.withLock {
             try {
                 val db = (context.applicationContext as App).database
                 val reminderTime = db.reminderTimeDao().getById(reminderTimeId)
@@ -423,50 +447,54 @@ object ReminderScheduler {
             } catch (e: Exception) {
                 Log.e(TAG, "调度明天固定提醒失败", e)
             }
+            }
         }
     }
 
     fun cancelAllReminders(context: Context) {
         scope.launch {
-            try {
-                val db = (context.applicationContext as App).database
-                val allTimes = db.reminderTimeDao().getEnabled()
+            mutex.withLock {
+                try {
+                    val db = (context.applicationContext as App).database
+                    val allTimes = db.reminderTimeDao().getEnabled()
 
-                val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+                    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-                // 取消所有固定时间提醒闹钟
-                allTimes.forEach { reminderTime ->
-                    val intent = Intent(context, ReminderReceiver::class.java)
-                    val pendingIntent = PendingIntent.getBroadcast(
+                    // 取消所有固定时间提醒闹钟
+                    allTimes.forEach { reminderTime ->
+                        val intent = Intent(context, ReminderReceiver::class.java)
+                        val pendingIntent = PendingIntent.getBroadcast(
+                            context,
+                            reminderTime.id.toInt(),
+                            intent,
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                        )
+                        alarmManager.cancel(pendingIntent)
+                    }
+
+                    // 取消间隔提醒（大周期）闹钟
+                    val intervalIntent = Intent(context, ReminderReceiver::class.java)
+                    val intervalPendingIntent = PendingIntent.getBroadcast(
                         context,
-                        reminderTime.id.toInt(),
-                        intent,
+                        REQUEST_CODE_INTERVAL,
+                        intervalIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
-                    alarmManager.cancel(pendingIntent)
+                    alarmManager.cancel(intervalPendingIntent)
+
+                    // 取消小周期闹钟
+                    val smallCycleIntent = Intent(context, ReminderReceiver::class.java)
+                    val smallCyclePendingIntent = PendingIntent.getBroadcast(
+                        context,
+                        REQUEST_CODE_SMALL_CYCLE,
+                        smallCycleIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                    alarmManager.cancel(smallCyclePendingIntent)
+                    Log.d(TAG, "已取消所有提醒闹钟，共 ${allTimes.size} 个固定时间")
+                } catch (e: Exception) {
+                    Log.e(TAG, "取消所有提醒失败", e)
                 }
-
-                // 取消间隔提醒（大周期）闹钟
-                val intervalIntent = Intent(context, ReminderReceiver::class.java)
-                val intervalPendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    REQUEST_CODE_INTERVAL,
-                    intervalIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                alarmManager.cancel(intervalPendingIntent)
-
-                // 取消小周期闹钟
-                val smallCycleIntent = Intent(context, ReminderReceiver::class.java)
-                val smallCyclePendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    REQUEST_CODE_SMALL_CYCLE,
-                    smallCycleIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-                )
-                alarmManager.cancel(smallCyclePendingIntent)
-            } catch (e: Exception) {
-                Log.e(TAG, "取消所有提醒失败", e)
             }
         }
     }

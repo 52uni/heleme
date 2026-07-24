@@ -26,6 +26,7 @@ import com.zhengui.waterreminder.databinding.ActivityMainBinding
 import com.zhengui.waterreminder.notification.FullscreenReminderActivity
 import com.zhengui.waterreminder.notification.NotificationHelper
 
+import com.zhengui.waterreminder.service.AlarmCheckWorker
 import com.zhengui.waterreminder.service.ReminderScheduler
 import com.zhengui.waterreminder.util.PreferenceManager
 import com.zhengui.waterreminder.ui.home.HomeFragment
@@ -170,6 +171,8 @@ class MainActivity : AppCompatActivity() {
         // 然后重新调度
         ReminderScheduler.scheduleNextReminder(this)
         ReminderScheduler.scheduleAllReminders(this)
+        // 注册 WorkManager 兜底检查任务
+        AlarmCheckWorker.enqueue(this)
         Toast.makeText(this, "喝水提醒已开启", Toast.LENGTH_SHORT).show()
     }
 
@@ -178,6 +181,7 @@ class MainActivity : AppCompatActivity() {
         ReminderScheduler.cancelReminder(this)
         ReminderScheduler.cancelSmallCycle(this)
         ReminderScheduler.cancelAllReminders(this)
+        AlarmCheckWorker.cancel(this)
         Toast.makeText(this, "喝水提醒已关闭", Toast.LENGTH_SHORT).show()
     }
 
@@ -221,6 +225,14 @@ class MainActivity : AppCompatActivity() {
         super.onResume()
         // 刷新自动启动开关状态（用户可能从系统设置返回）
         binding.drawerContent.drawerSwitchAutoStart.isChecked = isIgnoringBatteryOptimizations()
+
+        // 从系统设置返回或应用从后台恢复时，若提醒已开启则重新调度闹钟，
+        // 防止 OEM 系统清理导致闹钟被取消后无法恢复。
+        if (PreferenceManager.isReminderEnabled(this)) {
+            ReminderScheduler.scheduleNextReminder(this)
+            ReminderScheduler.scheduleAllReminders(this)
+            AlarmCheckWorker.enqueue(this)
+        }
     }
 
     private fun enableAutoStart(autoStartSwitch: SwitchMaterial) {

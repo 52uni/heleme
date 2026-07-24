@@ -3,7 +3,9 @@ package com.zhengui.waterreminder
 import android.app.Application
 import android.util.Log
 import com.zhengui.waterreminder.data.AppDatabase
+import com.zhengui.waterreminder.service.AlarmCheckWorker
 import com.zhengui.waterreminder.util.CrashHandler
+import com.zhengui.waterreminder.util.PreferenceManager
 
 class App : Application() {
     val database: AppDatabase by lazy { AppDatabase.getInstance(this) }
@@ -20,6 +22,12 @@ class App : Application() {
             Log.d(TAG, "数据库初始化开始")
             val db = database
             Log.d(TAG, "数据库初始化成功: $db")
+
+            // 如果提醒已开启，注册 WorkManager 兜底检查任务
+            if (PreferenceManager.isReminderEnabled(this)) {
+                AlarmCheckWorker.enqueue(this)
+                Log.d(TAG, "已注册闹钟兜底检查任务")
+            }
         } catch (e: Exception) {
             Log.e(TAG, "App 初始化失败", e)
             throw e
